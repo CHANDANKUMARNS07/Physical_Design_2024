@@ -10,7 +10,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
   ## Step 1 
 
 Open the terminal and ensure you are in the home directory. Launch any text editor to create a new file named 'file_name.c' for writing the C program. I have used the gedit editor.<br/>
-# i. CODE SNIPPET: 
+## i. CODE SNIPPET: 
 ``` c
 #include<stdio.h>
 int main(){
@@ -35,7 +35,9 @@ gcc -o output_filename.out filename.c
 The below image shows the c program and also the output i got for different values of n which is 100, 15, 1000 and the result is saved in "output.out" file.<br/>
 For verification we can use the mathematical formula for the sum of n numbers is : <br/>
 Sum = (n(n+1))/2<br/>
+
 ![output](https://github.com/user-attachments/assets/ea37bd1b-cb44-4fad-9c2a-e77e7c5ce9c9)
+
 ## TASK - 2
 ### Compiling the same C Program in RISC-V gcc compiler
 The procedure for compiling a C program using RISC-V gcc compiler is as follows :<br/>
