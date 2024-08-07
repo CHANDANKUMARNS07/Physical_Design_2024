@@ -10,7 +10,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
   ## Step 1 
 
 Open the terminal and ensure you are in the home directory. Launch any text editor to create a new file named 'file_name.c' for writing the C program. I have used the gedit editor.<br/>
-## i. CODE SNIPPET: 
+## i. Code Snippet : 
 ``` c
 #include<stdio.h>
 int main(){
