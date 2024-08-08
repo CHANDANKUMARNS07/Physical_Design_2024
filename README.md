@@ -4,7 +4,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 # Outline
 1.[LAB 1](#lab-1)
 # LAB 1
-  ## TASK - 1
+  ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
   This repository contains a simple C program that calculates the sum of n numbers. <br/>
   The following steps outline how to compile a C program using GCC. <br/>
@@ -39,7 +39,7 @@ Sum = (n(n+1))/2<br/>
 
 ![output](https://github.com/user-attachments/assets/ea37bd1b-cb44-4fad-9c2a-e77e7c5ce9c9)
 
-## TASK - 2
+## TASK 2
 ### Compiling the same C Program in RISC-V gcc compiler
 The procedure for compiling a C program using RISC-V gcc compiler is as follows :<br/>
 ## Step 1
