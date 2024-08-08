@@ -2,9 +2,8 @@
 This is Chandan Kumar N S (MS2024007). <br/>
 Course - Physical Design of ASICs ( VLS508) <br/>
 # Outline
-1.[LAB - 1  
-](LAB---1)
-# LAB - 1 
+1.[LAB 1](#lab-1)
+# LAB 1
   ## TASK - 1
   ### Write a C Program and compile it on gcc compiler.
   This repository contains a simple C program that calculates the sum of n numbers. <br/>
