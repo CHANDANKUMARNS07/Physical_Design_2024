@@ -4,7 +4,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 # Outline
 1.[LAB 1](#lab-1)<br/>
 2.[LAB 2](#lab-2)<br/>
-3.[LAB 3](lab-3)<br/>
+3.[LAB 3](#lab-3)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
