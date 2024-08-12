@@ -221,7 +221,7 @@ Used for jump instructions.
 
 ## RISC-V instruction types and the corresponding 32-bit instruction codes for the provided instructions:<br/>
 
-| S. No. | Assembly Instruction | Instruction format |         32 bit Instruction Code        | Hexadecimal representation|
+| S. No. | Assembly Instruction | Instruction format |         32 bit Instruction Code as per the type of format       | Hexadecimal representation|
 |--------|----------------------|--------------------|----------------------------------------|---------------------------|
 | 1.     | ADD r11, r12, r13       | R                  |0000000 01101 01100 000 01011 0110011  |        0x00D605B3         |
 | 2.     | SUB r13, r11, r12       | R                  | 0100000 01100 01011 000 01101 0110011  |        0x40C586B3         |
@@ -338,7 +338,7 @@ To compile and to get gtkwave of the iiitb_rv32i.v file and it's testbench iiitb
 ![add1](https://github.com/user-attachments/assets/941e1196-7333-446f-aa9a-72e98dfb52fb)
 
 ## - **Instruction 12: BNE r0,r1,20**
-After uncommenting the bne ro, r1, 20 line we get this but as we haven't mention any values to perform the operation this doesn't show any output.<br/>
+After uncommenting the above instruction line we get this type of output but as we haven't mention any values to perform the operation this doesn't show any output.<br/>
 
 ![bne](https://github.com/user-attachments/assets/243f6c90-562f-4e21-90d2-a5704ba1c5e0)
 
@@ -346,7 +346,7 @@ After uncommenting the bne ro, r1, 20 line we get this but as we haven't mention
 ## - **Instruction 14: SLL r15,r1,r2
 ## - **Instruction 15: SRL r16, r14, r2**
 
-As i did the same thing by uncommenting these instructions 13, 14, 15 to get the output i got the below error saying that their is a not enough space for executing it.
+As i did the same thing by uncommenting these instructions 13, 14, 15 to get the output i got the below error saying that their is a not enough space for executing it.<br/>
                                                                                                                                                                           
 ![error thing](https://github.com/user-attachments/assets/73b911de-e825-419b-90d8-50558bfa55fd)
 
