@@ -342,9 +342,9 @@ After uncommenting the above instruction line we get this type of output but as 
 
 ![bne](https://github.com/user-attachments/assets/243f6c90-562f-4e21-90d2-a5704ba1c5e0)
 
-## - **Instruction 13: ADDI r12,r4,5**
-## - **Instruction 14: SLL r15,r1,r2**
-## - **Instruction 15: SRL r16, r14, r2**
+### - **Instruction 13: ADDI r12,r4,5**
+### - **Instruction 14: SLL r15,r1,r2**
+### - **Instruction 15: SRL r16, r14, r2**
 
 As i did the same thing by uncommenting these instructions 13, 14, 15 to get the output i got the below error saying that their is a not enough space for executing it.<br/>
                                                                                                                                                                           
