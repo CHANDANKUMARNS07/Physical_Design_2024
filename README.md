@@ -5,6 +5,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 1.[LAB 1](#lab-1)<br/>
 2.[LAB 2](#lab-2)<br/>
 3.[LAB 3](#lab-3)<br/>
+4.[LAB 4](#lab-4)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -355,6 +356,111 @@ As i did the same thing by uncommenting these instructions 13, 14, 15 to get the
 This experiment demonstrated the functional simulation of various RISC-V instructions using a Verilog netlist and testbench. We observed the behavior of each instruction through waveform analysis, providing insights into the RISC-V core's operation.<br/>
 
 The comparison between standard RISC-V ISA encoding and the hardcoded ISA used in the simulation highlights the differences in instruction representation, which is crucial for understanding the implementation details of this particular RISC-V core. <br/> 
+
+# LAB 4
+
+## Compiling a C code of real life application with GCC and RISC-V GCC and also with SPIKE simulator.
+## Password Strength Checker
+A simple C program to evaluate and display the strength of a given password based on length, character diversity, and complexity. Useful for integrating basic security checks in applications requiring user authentication.<br/>
+## i. Code Snippet:
+```
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MIN_LENGTH 8
+
+int isStrongPassword(const char *password) {
+    int hasUpper = 0, hasLower = 0, hasDigit = 0, hasSpecial = 0;
+    const char specialChars[] = "!@#$%^&*()-_+=<>?/[]{}|";
+    
+    // Check the length
+    if (strlen(password) < MIN_LENGTH) {
+        return 0; // Password too short
+    }
+
+    // Check for required character types
+    for (int i = 0; password[i] != '\0'; i++) {
+        if (isupper(password[i])) {
+            hasUpper = 1;
+        } else if (islower(password[i])) {
+            hasLower = 1;
+        } else if (isdigit(password[i])) {
+            hasDigit = 1;
+        } else {
+            for (int j = 0; specialChars[j] != '\0'; j++) {
+                if (password[i] == specialChars[j]) {
+                    hasSpecial = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return hasUpper && hasLower && hasDigit && hasSpecial;
+}
+
+int main() {
+    char password[100];
+    
+    printf("Enter your password: ");
+    scanf("%99s", password);
+    
+    if (isStrongPassword(password)) {
+        printf("Your password is strong.\n");
+    } else {
+        printf("Your password is weak. It should be at least %d characters long, and include:\n", MIN_LENGTH);
+        printf("- At least one uppercase letter\n");
+        printf("- At least one lowercase letter\n");
+        printf("- At least one digit\n");
+        printf("- At least one special character (eg. *!)\n");
+    }
+
+    return 0;
+}
+```
+## ii. Save the program. Compile the code using the GCC compiler with the following command.<br/>
+```
+gcc file_name.c
+```
+## Output
+The output can be viewed by opening the .out file. By default, the compiler creates a file named 'a.out' in the same directory. This name can be changed using the following command.<br/>
+```
+gcc -o output_filename.out filename.c
+```
+The below image shows the output and the result is saved in "output.out" file.<br/>
+
+![1](https://github.com/user-attachments/assets/a2673885-5b93-4c36-852a-2756b69a5454)
+
+## iii. Now, compile the program using RISC-V gcc compiler and also with SPIKE Simulator
+The procedure for compiling a C program using RISC-V gcc compiler is as follows :<br/>
+
+```
+riscv64-unknown-elf-gcc -Ofast -mabi=lp64 -march=rv64i -o filename.o filename.c
+ls -ltr filename.o
+```
+Now using the command in figure, we'll get assembly code of our c programme. We'll get a bunch of code. 
+```
+riscv64-unknown-elf-objdump -d filename.o
+riscv64-unknown-elf-objdump -d filename.o | less
+```
+![4](https://github.com/user-attachments/assets/3581916d-c7d6-44cc-8962-4342c6077f8b)
+
+We get the following output:<br/>
+
+The assembly level of main section of the program application.c is shown below in the snapshot for reference.
+
+![2(1)](https://github.com/user-attachments/assets/ecf04561-dd3d-46a8-a2a6-529d9fdc1289)
+
+Again re-compile the c program using gcc compiler and spike simulator. We get the below shown output.<br/>
+
+```
+spike pk filename.o
+```
+![5()1](https://github.com/user-attachments/assets/909170dc-d02c-4896-9a99-00802ce49af8)
+![5](https://github.com/user-attachments/assets/58149016-d927-4c8a-b766-61b46398d399)
+
+Concluding that in both GCC and RISCV-GCC using SPIKE simulator we can say that we get the same result. 
 
 
 
