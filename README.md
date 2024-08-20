@@ -6,6 +6,9 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 2.[LAB 2](#lab-2)<br/>
 3.[LAB 3](#lab-3)<br/>
 4.[LAB 4](#lab-4)<br/>
+5.[LAB 5](#lab-5)<br/>
+6.[LAB 6](#lab-6)<br/>
+7.[LAB 7](#lab-7)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -461,6 +464,393 @@ spike pk filename.o
 ![5](https://github.com/user-attachments/assets/58149016-d927-4c8a-b766-61b46398d399)
 
 Concluding that in both GCC and RISCV-GCC using SPIKE simulator we can say that we get the same result. 
+
+# LAB 5
+
+## Digital Logic with TL-Verilog in Makerchip IDE
+### MAKERCHIP 
+[Makerchip](https://makerchip.com/) is a free online environment for developing high-quality integrated circuits. You can code, compile, simulate, and debug Verilog designs, all from your browser. Your code, block diagrams, and waveforms are tightly integrated.<br/>
+
+### TL VERILOG  
+Transaction Level Verilog or TL-Verilog is an extension to existing Verilog HDL and a huge step forward in coding HDL languages. TL-Verilog introduces simpler syntaxes and adds powerful constructs which makes Logic Design fun and easy. (Also can say its a Higher Abstraction to Sys V). Generally, high-speed designs are less than half the size in TL-Verilog versus SystemVerilog without any loss in detail! More about it [here](https://www.redwoodeda.com/tl-verilog)<br/>
+
+### DIGITAL DESIGN
+Below are a set of images from Makerchip showcasing the TL-V code for Combinational and sequential logic and Simulation Output. Most of the basic circuits examples can be found in Makerchip Tutorials anexhaustive list to get anyone enough information to learn the platform and TL-Verilog.<br/>
+
+### LOGIC GATES
+
+Logic gates are the fundamental building blocks of digital circuits. They perform basic logical functions that are essential in computing and digital systems. Each gate takes one or more binary inputs and produces a single binary output, following a specific logic rule.<br/>
+
+1. AND Gate: Outputs 1 only when all its inputs are 1.<br/>
+2. OR Gate: Outputs 1 if at least one of its inputs is 1.<br/>
+3. NOT Gate (Inverter): Outputs the opposite of the input; 1 becomes 0, and 0 becomes 1.<br/>
+4. NAND Gate: Outputs 0 only when all its inputs are 1. It is the inverse of the AND gate.<br/>
+5. NOR Gate: Outputs 0 if at least one of its inputs is 1. It is the inverse of the OR gate.<br/>
+6. XOR Gate: Outputs 1 only when the number of 1 inputs is odd.<br/>
+7. XNOR Gate: Outputs 1 only when the number of 1 inputs is even, making it the inverse of the XOR gate.<br/>
+These gates are used in combination to create complex circuits like adders, multiplexers, and memory units, forming the foundation of all digital electronics.<br/>
+The below shown image are the logic gates<br/>
+![image](https://github.com/user-attachments/assets/bebf58a9-7d4f-4be1-8bdf-217cdf4bef35)
+
+### COMBINATIONAL CIRCUITS
+Combinational circuits are digital circuits where the output depends solely on the current inputs, without any memory or feedback loops. They perform specific logical operations like addition, subtraction, or comparison using logic gates. Common examples include multiplexers, demultiplexers, adders, and encoders, which are integral in processing and controlling data in digital systems.<br/>
+
+### BASIC COMBINATIONAL CIRCUITS IN MAKERCHIP
+
+1. Pythagorean example<br/>
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   `include "sqrt32.v";
+   
+   m4_makerchip_module
+\TLV
+   
+   // Stimulus
+   |calc
+      @0
+         $valid = & $rand_valid[1:0];  // Valid with 1/4 probability
+                                       // (& over two random bits).
+   
+   // DUT (Design Under Test)
+   |calc
+      ?$valid
+         @1
+            $aa_sq[7:0] = $aa[3:0] ** 2;
+            $bb_sq[7:0] = $bb[3:0] ** 2;
+         @2
+            $cc_sq[8:0] = $aa_sq + $bb_sq;
+         @3
+            $cc[4:0] = sqrt($cc_sq);
+
+
+   // Print
+   |calc
+      @3
+         \SV_plus
+            always_ff @(posedge clk) begin
+               if ($valid)
+                  \$display("sqrt((\%2d ^ 2) + (\%2d ^ 2)) = \%2d", $aa, $bb, $cc);
+            end
+
+\SV
+   endmodule
+```
+![pythagoras_theorem](https://github.com/user-attachments/assets/d6acc6c2-4d86-4af6-ba49-f1d1b518b204)
+
+3. Inverter<br/>
+```
+$out = ~$in1;
+```
+![inv_code](https://github.com/user-attachments/assets/63ff7acc-1f52-4b9c-af55-4f12e149b6dd)
+
+![inv_wave](https://github.com/user-attachments/assets/ff7f9d50-968c-43b8-851a-f0cb24b31681)
+
+4. Vectors<br/>
+
+```
+$out[4:0] = $in1[3:0] + $in2[3:0] ;
+
+```
+![a+b](https://github.com/user-attachments/assets/76935524-cf08-4d1e-96b7-e2858b1368f9)
+
+6. Multiplexer<br/>
+
+![image](https://github.com/user-attachments/assets/872acaa4-552f-46c3-ac2a-332bf5f25f04)
+
+ ```
+   $out[7:0] = $sel ? $in1[7:0] : $in2[7:0] ;
+ ```
+ ![mux](https://github.com/user-attachments/assets/f16c999b-b578-4838-8c75-b51ca7558729)
+
+7. Combinational Calculator<br/>
+
+![image](https://github.com/user-attachments/assets/8fe3ecfe-74b0-447a-8bfa-2411b3b68aaf)
+
+![calc_comb](https://github.com/user-attachments/assets/23474aa2-f095-496c-9ae7-259c2c64b45b)
+![calc_comb_diagram](https://github.com/user-attachments/assets/ff3585a6-fc09-4bf8-aee6-74038ebc2aa6)
+  
+
+### SEQUENTIAL CIRCUITS
+Sequential circuits are digital circuits where the output depends on both the current inputs and the history of past inputs, using memory elements like flip-flops. They are used to design systems like counters, registers, and finite state machines, which require storage and timing elements.<br/>
+
+Sequential Logic<br/>
+![image](https://github.com/user-attachments/assets/372b159f-5011-4c90-a6a6-baf5f9244e91)
+
+### BASIC SEQUENTIAL CIRCUITS IN MAKERCHIP
+
+1. Fibonacci Series with reset<br/>
+
+![image](https://github.com/user-attachments/assets/6b256b8f-45bf-4abc-a913-c45878fcb6ab)
+```
+$num[15:0] = $reset ? 1 : (>>1$val + >>2$val) ;
+```
+![fibo](https://github.com/user-attachments/assets/59dc9aa3-e4aa-4bdc-882c-cc54b2148e37)
+
+2. Free running counter<br/>
+
+![image](https://github.com/user-attachments/assets/0a465f97-e4e5-40c0-8215-fbd1245a4999)
+```
+$num[15:0] = $reset ? 0 : (1+>>1$val) ;
+```
+![free running counter](https://github.com/user-attachments/assets/b74be74f-f61b-432d-a6fa-7acf0d814de3)
+
+3. Sequential Calculator<br/>
+
+![image](https://github.com/user-attachments/assets/c39ffdf6-e3c5-466a-beb3-da014ceb5ac9)
+
+![calc_seq](https://github.com/user-attachments/assets/d1cba3cb-313b-4bd0-9b74-ff1eddabe801)
+![calc_seq_waveform](https://github.com/user-attachments/assets/bacb09cd-1c48-4735-a633-ba5fea1ee872)
+
+### PIPELINING
+
+![image](https://github.com/user-attachments/assets/ab28d225-8ccb-4f85-99f5-48f98d5388b5)
+
+1. Pythagoras theorem for timing abstract <br/>
+
+i. 4 cycles<br/>
+
+![pyth_4cycles](https://github.com/user-attachments/assets/5d882b2f-5d17-4d13-8595-acf9cd95ea31)
+
+ii. 12 cycles<br/>
+
+![pyth_12cycles](https://github.com/user-attachments/assets/b53ba172-56f6-4800-9b66-19752ea8d531)
+
+2. Counter and Calculator in Pipeline<br/>
+
+![image](https://github.com/user-attachments/assets/ebca88aa-1279-462e-9a30-1bb62d57da08)
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+
+   // =========================================
+   // Welcome!  Try the tutorials via the menu.
+   // =========================================
+
+   // Default Makerchip TL-Verilog Code Template
+   
+   m4_include_lib //(['https://raw.githubusercontent.com/stevehoover/RISC-V_MYTH_Workshop/bd1f186fde018ff9e3fd80597b7397a1c862cf15/tlv_lib/calculator_shell_lib.tlv'])
+
+\SV   
+   // Macro providing required top-level module definition, random
+   // stimulus support, and Verilator config.
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+   //m4+cal_viz(@3)
+\TLV
+   |calc
+      @0
+         $reset = *reset;
+      @1
+         $val1[31:0]  =  >>1$out;
+      // $val1[31:0]  = $rand1[3:0];
+         $val2[31:0]  = $rand2[3:0];
+         $op[1:0]    = $rand1[1:0];
+         $sum[31:0]   = $val1 + $val2;
+         $sub[31:0]   = $val1 - $val2;
+         $mul[31:0]   = $val1 * $val2;
+         $quotient[31:0] = $val1 / $val2;
+         $out[31:0]  = $reset? 0 :  ($op[1]? ($op[0]? ($sum) : ($sub)): ($op[0]? ($mul) : ($quotient))); 
+         $count[31:0] = $reset? 0 :  (>>1$count+1);
+        m4+cal_viz(@3) // Arg: Pipeline stage represented by viz, should be atleast equal to last stage of CALCULATOR logic.           
+      // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+\SV
+   endmodule
+```
+![cnt_cal_single_pipeline](https://github.com/user-attachments/assets/c00ea84d-473c-47a6-af9e-13ebfbdea8c4)
+![cnt_cal_single_pipelinewaveform](https://github.com/user-attachments/assets/f67c4ef4-6d1e-45fb-9a62-763b393f7a49)
+
+3. 2-Cycle Calculator<br/>
+
+![image](https://github.com/user-attachments/assets/eeea5799-67b6-41c0-aa5f-9a4895d4634a)
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+
+   // =========================================
+   // Welcome!  Try the tutorials via the menu.
+   // =========================================
+
+   // Default Makerchip TL-Verilog Code Template
+   
+   m4_include_lib(['https://raw.githubusercontent.com/stevehoover/RISC-V_MYTH_Workshop/bd1f186fde018ff9e3fd80597b7397a1c862cf15/tlv_lib/calculator_shell_lib.tlv'])
+
+\SV   
+   // Macro providing required top-level module definition, random
+   // stimulus support, and Verilator config.
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+   //m4+cal_viz(@3)
+\TLV
+   |calc
+      @0
+         $reset = *reset;
+      @1
+         $val2[31:0]  = $rand2[3:0];
+        // $op[1:0]     = $rand1[1:0];
+         $valid = $reset? 0 :  (>>1$valid+1);
+         
+         $val1[31:0]  =  >>2$out;            
+                   
+                  // $val1[31:0]  = $rand1[3:0];
+         $sum[31:0]   = $val1 + $val2;
+         $sub[31:0]   = $val1 - $val2;
+         $mul[31:0]   = $val1 * $val2;
+         $quotient[31:0] = $val1 / $val2;
+            
+      @2
+         $valid_reset = ($reset || (!($valid)));   
+         $out[31:0]  = $valid_reset ? 0 : ($op[1] ? ($op[0] ? $sum : $sub): ($op[0] ? $mul : $quotient )); 
+
+  // m4+cal_viz(@2) // Arg: Pipeline stage represented by viz, should be atleast equal to last stage of CALCULATOR logic.           
+      // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+\SV
+   endmodule
+```
+![calc_double_cycle_pipeline](https://github.com/user-attachments/assets/fb67ce31-a84a-4773-ae89-f8c9e501f0c1)
+![calc_double_cycle_pipeline_waveform](https://github.com/user-attachments/assets/5077f0ad-3909-416e-80f5-85ced81b6916)
+
+### VALIDITY
+
+1. 2-Cycle Calculator with Validity<br/>
+
+![image](https://github.com/user-attachments/assets/6922e206-dd89-4c17-b9e2-ad9d3228f1d6)
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/stevehoover/RISC-V_MYTH_Workshop/bd1f186fde018ff9e3fd80597b7397a1c862cf15/tlv_lib/calculator_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+
+\TLV   
+   |calc
+      @0
+         $reset = *reset;
+         $clk_chandan = *clk;
+      @1
+         $val1 [31:0] = >>2$out [31:0];
+         $val2 [31:0] = $rand2[3:0];
+         
+         $valid = $reset ? 1'b0 : >>1$valid + 1'b1 ;
+         $valid_or_reset = $valid || $reset;
+         
+      ?$vaild_or_reset
+         @1   
+            $sum [31:0] = $val1 + $val2;
+            $diff[31:0] = $val1 - $val2;
+            $prod[31:0] = $val1 * $val2;
+            $quot[31:0] = $val1 / $val2;
+            
+         @2   
+            $out [31:0] = $reset ? 32'b0 :
+                          ($op[1:0] == 2'b00) ? $sum :
+                          ($op[1:0] == 2'b01) ? $diff :
+                          ($op[1:0] == 2'b10) ? $prod :
+                                                $quot ;
+            
+            
+
+      // Macro instantiations for calculator visualization(disabled by default).
+      // Uncomment to enable visualisation, and also,
+      // NOTE: If visualization is enabled, $op must be defined to the proper width using the expression below.
+      //       (Any signals other than $rand1, $rand2 that are not explicitly assigned will result in strange errors.)
+      //       You can, however, safely use these specific random signals as described in the videos:
+      //  o $rand1[3:0]
+      //  o $rand2[3:0]
+      //  o $op[x:0]
+      
+   //m4+cal_viz(@3) // Arg: Pipeline stage represented by viz, should be atleast equal to last stage of CALCULATOR logic.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+
+\SV
+   endmodule
+```
+![cycle_calc_with_validity](https://github.com/user-attachments/assets/d8bc618f-d811-4f04-a15b-1006f91b93cc)
+![cycle_calc_with_validitywaveform](https://github.com/user-attachments/assets/d54e9a10-3dea-48e0-8a86-6fe5e371b31e)
+
+2. Calculator with Single-Value Memory<br/>
+
+![image](https://github.com/user-attachments/assets/1de62422-4402-4356-9519-3cc5784c70a9)
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+
+   // =========================================
+   // Welcome!  Try the tutorials via the menu.
+   // =========================================
+
+   // Default Makerchip TL-Verilog Code Template
+   
+   m4_include_lib(['https://raw.githubusercontent.com/stevehoover/RISC-V_MYTH_Workshop/bd1f186fde018ff9e3fd80597b7397a1c862cf15/tlv_lib/calculator_shell_lib.tlv'])
+
+\SV   
+   // Macro providing required top-level module definition, random
+   // stimulus support, and Verilator config.
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+   //m4+cal_viz(@3)
+\TLV
+   |calc
+      @0
+         $reset = *reset;
+      @1
+         $val2[31:0]  = $rand2[3:0];
+        // $op[1:0]     = $rand1[1:0];
+         $valid = ($reset)? 0 :  (>>1$valid+1);
+         
+         $val1[31:0]  =  >>2$out;            
+                   
+                  // $val1[31:0]  = $rand1[3:0];
+         $sum[31:0]   = $val1 + $val2;
+         $sub[31:0]   = $val1 - $val2;
+         $mul[31:0]   = $val1 * $val2;
+         $quotient[31:0] = $val1 / $val2;
+            
+      @2
+         $valid_reset = ($reset || (!($valid)));   
+         $mem[31:0]   = ($reset)?  0 : (($op[2:0] == 3'b101)?  $val1 : >>2$mem) ;
+         $out[31:0]   =  ($reset)? 32'b0 :
+                         ($op[2:0] == 3'b000)? $quotient :
+                         ($op[2:0] == 3'b001)? $mul :
+                         ($op[2:0] == 3'b010)? $sub :
+                         ($op[2:0] == 3'b011)? $sum :
+                         ($op[2:0] == 3'b100)? >>2$mem : >>2$out ;  
+
+   m4+cal_viz(@2) // Arg: Pipeline stage represented by viz, should be atleast equal to last stage of CALCULATOR logic.           
+      // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+\SV
+   endmodule
+```
+![cal_single_valuememory](https://github.com/user-attachments/assets/ae75f110-6e54-4320-b688-754a86cf274a)
+![calcsinglevaluememorywaveform_1](https://github.com/user-attachments/assets/cf54b383-930b-46ef-8f76-de2eeb70e175)
+![calcsinglevaluememorywaveform_2](https://github.com/user-attachments/assets/538dffc4-5201-43c4-9b8d-ca0b265ecd6c)
+![calcsinglevaluememorywaveform_3](https://github.com/user-attachments/assets/151092e5-71bd-44fe-913e-11ca2b245157)
+
+### HIERARCHY
+
+3D Distance Calculation<br/>
+
+using pythagorean example<br/>
+
+![image](https://github.com/user-attachments/assets/2dd25f90-ac31-4b7a-8bbd-d01dae70ee77)
+
+![image](https://github.com/user-attachments/assets/07cf520a-ce77-49fb-92b4-16703d45dbf7)
+
+
+ 
+
 
 
 
