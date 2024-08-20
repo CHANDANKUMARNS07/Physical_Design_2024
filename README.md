@@ -574,7 +574,7 @@ $out[4:0] = $in1[3:0] + $in2[3:0] ;
 ### SEQUENTIAL CIRCUITS
 Sequential circuits are digital circuits where the output depends on both the current inputs and the history of past inputs, using memory elements like flip-flops. They are used to design systems like counters, registers, and finite state machines, which require storage and timing elements.<br/>
 
-Sequential Logic<br/>
+### Sequential Logic<br/>
 ![image](https://github.com/user-attachments/assets/372b159f-5011-4c90-a6a6-baf5f9244e91)
 
 ### BASIC SEQUENTIAL CIRCUITS IN MAKERCHIP
@@ -604,7 +604,7 @@ $num[15:0] = $reset ? 0 : (1+>>1$val) ;
 
 ### PIPELINING
 
-![image](https://github.com/user-attachments/assets/ab28d225-8ccb-4f85-99f5-48f98d5388b5)
+![image](https://github.com/user-attachments/assets/ab28d225-8ccb-4f85-99f5-48f98d5388b5)<br/>
 
 1. Pythagoras theorem for timing abstract <br/>
 
@@ -849,22 +849,1825 @@ using pythagorean example<br/>
 ![image](https://github.com/user-attachments/assets/07cf520a-ce77-49fb-92b4-16703d45dbf7)
 
 
- 
+# LAB 6
+
+## RISC-V Core Implementation
+
+This section will cover the implementation of a simple 3-stage RISC-V Core / CPU. The 3-stages broadly are: Fetch, Decode and Execute. The diagram below is the basic block of the CPU core.<br/>
+![image](https://github.com/user-attachments/assets/594fafcd-11b8-46f4-9b7e-3d74dd4c22a6)
+
+### RISC-V Shell Code
+
+The basic TL verilog code for sum 1 to 9 
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
 
 
 
+      // YOUR CODE HERE
+      // ...
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      //m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   //m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+
+### 1. Program Counter
+PC basically used for pointing out the executing out the current instruction execution and it will have next instruction which is to be executed.<br/>
+![image](https://github.com/user-attachments/assets/c8e18655-ccbf-4073-8cf0-096a9b96d0ac)
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
 
 
+     
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      //m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   //m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![pc](https://github.com/user-attachments/assets/ed16a369-5c2a-44d6-bab8-5b61a8a65fde)
+![pc_waveform](https://github.com/user-attachments/assets/18010ee0-893d-4cf1-a29b-932f562c5380)
+
+### 2. Fetch_1
+The instruction fetch unit (IFU) in a central processing unit (CPU) is responsible for organising program instructions to be fetched from memory, and executed, in an appropriate order. This makes the control logic of the core.<br/>
+
+![image](https://github.com/user-attachments/assets/54e60e02-46c8-4fd0-abef-b419da28c9b8)
+
+Uncomment //m4+imem(@1), and //m4+cpu_viz(@4) compile, and observe log
+errors.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
 
 
+    
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![fetch](https://github.com/user-attachments/assets/55532c00-9824-4c64-a536-815df6229337)
 
 
+### Fetch_2
+
+![image](https://github.com/user-attachments/assets/845f9629-3349-4f11-8657-ca47ec4f2c44)
+
+For the same pc code add the IMEM_rd inputs and outputs.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+
+      
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![fetch2](https://github.com/user-attachments/assets/caa14e8a-4738-493a-9b59-6db8d2e0e069)
+![fetch2viz](https://github.com/user-attachments/assets/e750549e-2615-4db7-b37a-ac5bd163c856)
+
+### 3. Decode
+
+![image](https://github.com/user-attachments/assets/bea3a626-c8cc-4d93-8087-f09ccc01eb1f)
+
+6 types of Instructions type decode:<br/>
+
+* R-type - Register
+* I-type - Immediate
+* S-type - Store
+* B-type - Branch (Conditional Jump)
+* U-type - Upper Immediate
+* J-type - Jump (Unconditional Jump)
+
+![image](https://github.com/user-attachments/assets/9fd0c6a5-8e0a-495c-ac92-2c805f2ccedc)
+
+ Instruction Decode<br/>
+![image](https://github.com/user-attachments/assets/5e48a225-6b83-4339-ba16-c81dcf9fdef9)
+
+Immediate Decode<br/>
+
+![image](https://github.com/user-attachments/assets/acd87978-37c7-4bb5-b721-a497c3df8f2a)
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+      
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![decode_inst_type_imm](https://github.com/user-attachments/assets/0fad7606-ece9-4cbd-ac04-d3eed0ef2808)
+
+Instruction Field Decode<br/>
+
+![image](https://github.com/user-attachments/assets/4b7c0e74-b775-4cc7-ab82-0f3a498dcf63)
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+      
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![inst_decode_field_code](https://github.com/user-attachments/assets/7509bf57-0f14-46da-a275-004504254e31)
+![inst_decode_field_diagram](https://github.com/user-attachments/assets/5fef41e0-4ccd-4575-8e0f-85db7fec565c)
+
+RV32I Base Instruction Set
+
+![image](https://github.com/user-attachments/assets/7f70e32b-81fa-4356-a2c9-d935646b2245)
 
 
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+      
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      //m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![inst_decode_code](https://github.com/user-attachments/assets/b059652d-cd75-474a-87d1-493bb16f25ae)
+
+![inst_decode_dia](https://github.com/user-attachments/assets/7d5f246d-f260-4bef-9107-97c14b01c816)
+
+### 4. Reg File read_1
+
+![image](https://github.com/user-attachments/assets/4ec916e0-a98a-4396-9c1e-22ab7f0201f7)
 
 
+Here the Register file is 2 read, 1 write which means 2 read and 1 write operation can happen simultanously.
+
+Inputs:
+
+* Read_Enable - Enable signal to perform read operation
+* Read_Address1 - Address1 from where data has to be read
+* Read_Address2 - Address2 from where data has to be read
+* Write_Enable - Enable signal to perform write operation
+* Write_Address - Address where data has to be written
+* Write_Data - Data to be written at Write_Address
+  
+Outputs:
+
+* Read_Data1 - Data from Read_Address1
+* Read_Data2 - Data from Read_Address2
+
+![image](https://github.com/user-attachments/assets/d4b1ff71-e6d4-4a38-9f90-d1b2049869b4)
+
+In this the outputs are not added.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+      
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![reg_file_read_code](https://github.com/user-attachments/assets/88179799-51b3-49cd-9246-fa5cc98095b0)
+![reg_file_read_dia](https://github.com/user-attachments/assets/f02a2ea5-9d3f-4d54-8f94-a80ebce53a4f)
+
+### Reg file read_2
+
+In this the outputs are added.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+         //output of rf
+         $src1_value[31:0] = $rf_rd_data1;
+         $src2_value[31:0] = $rf_rd_data2;
+
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![rf_read_withoutput_code](https://github.com/user-attachments/assets/3afbb8b3-a32d-4cd2-b269-74940809bd13)
+![rf_read_withoutput_dia](https://github.com/user-attachments/assets/09fa4436-9be6-4907-81e4-94fdffef7c5e)
+
+### 5. ALU
+![image](https://github.com/user-attachments/assets/6900cfb1-2e7a-456f-be42-7ca9d807f1f6)
+
+During the execute stage at ALU, both the operands perform the operation based on opcode. Below is snapshot from Makerchip IDE after performing the execute stage.<br/>
 
 
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+         //output of rf
+         $src1_value[31:0] = $rf_rd_data1;
+         $src2_value[31:0] = $rf_rd_data2;
+         
+         //ARITHMETIC AND LOGIC UNIT (ALU)
+         $result[31:0] = $is_addi ? $src1_value + $imm :
+                         $is_add ? $src1_value + $src2_value :
+                         32'bx ;
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![alu_code](https://github.com/user-attachments/assets/0d35307b-670d-4d30-b4e4-7d023ceeb052)
+![alu_dia](https://github.com/user-attachments/assets/c6a81157-5637-4c86-91ee-fcaae2b14c09)
+
+### 6. Reg file write
+
+![image](https://github.com/user-attachments/assets/6ecb21eb-cce0-423c-8118-1ab635d2c29a)
+
+![image](https://github.com/user-attachments/assets/71160228-b82e-4a06-9f41-c49834fb83d7)
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+         //output of rf
+         $src1_value[31:0] = $rf_rd_data1;
+         $src2_value[31:0] = $rf_rd_data2;
+         
+         //ARITHMETIC AND LOGIC UNIT (ALU)
+         $result[31:0] = $is_addi ? $src1_value + $imm :
+                         $is_add ? $src1_value + $src2_value :
+                         32'bx ;
+         
+         //REGISTER FILE WRITE
+         $rf_wr_en = $rd_valid && $rd != 5'b0;
+         $rf_wr_index[4:0] = $rd;
+         $rf_wr_data[31:0] = $result;
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![reg_file_write_code](https://github.com/user-attachments/assets/89fbff16-0d94-494b-91c5-6817b5b184f3)
+![reg_file_write_dia](https://github.com/user-attachments/assets/f36b9191-3bc0-4aa3-b8a1-43af271e2baf)
+
+### 7. Branches
+
+![image](https://github.com/user-attachments/assets/29f59904-eca1-42bf-9b67-c31ecbc22da3)
+
+During decode stage, branch target address is calculated and fed into PC mux. Before execute stage, once the operands are ready branch condition is checked. Below is snapshot from Makerchip IDE after including the control logic for branch instructions.<br/>
+
+* The first is without targetting the pc.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+         //output of rf
+         $src1_value[31:0] = $rf_rd_data1;
+         $src2_value[31:0] = $rf_rd_data2;
+         
+         //ARITHMETIC AND LOGIC UNIT (ALU)
+         $result[31:0] = $is_addi ? $src1_value + $imm :
+                         $is_add ? $src1_value + $src2_value :
+                         32'bx ;
+         
+         //REGISTER FILE WRITE
+         $rf_wr_en = $rd_valid && $rd != 5'b0;
+         $rf_wr_index[4:0] = $rd;
+         $rf_wr_data[31:0] = $result;
+         
+         //BRANCH INSTRUCTIONS
+         $taken_branch = $is_beq ? ($src1_value == $src2_value):
+                         $is_bne ? ($src1_value != $src2_value):
+                         $is_blt ? (($src1_value < $src2_value) ^ ($src1_value[31] != $src2_value[31])):
+                         $is_bge ? (($src1_value >= $src2_value) ^ ($src1_value[31] != $src2_value[31])):
+                         $is_bltu ? ($src1_value < $src2_value):
+                         $is_bgeu ? ($src1_value >= $src2_value):
+                                    1'b0;
+         `BOGUS_USE($taken_branch)
+         
+         
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![branch1_code](https://github.com/user-attachments/assets/49f226b8-e6cc-4961-9955-6bd4d80b0bfc)
+![branch1_dia](https://github.com/user-attachments/assets/a594fec6-1a06-4460-8f53-15b254187ed3)
+
+The second is targetting the pc.<br/>
+
+```
+\m4_TLV_version 1d: tl-x.org
+\SV
+   // This code can be found in: https://github.com/stevehoover/RISC-V_MYTH_Workshop
+   
+   m4_include_lib(['https://raw.githubusercontent.com/BalaDhinesh/RISC-V_MYTH_Workshop/master/tlv_lib/risc-v_shell_lib.tlv'])
+
+\SV
+   m4_makerchip_module   // (Expanded in Nav-TLV pane.)
+\TLV
+
+   // /====================\
+   // | Sum 1 to 9 Program |
+   // \====================/
+   //
+   // Program for MYTH Workshop to test RV32I
+   // Add 1,2,3,...,9 (in that order).
+   //
+   // Regs:
+   //  r10 (a0): In: 0, Out: final sum
+   //  r12 (a2): 10
+   //  r13 (a3): 1..10
+   //  r14 (a4): Sum
+   // 
+   // External to function:
+   m4_asm(ADD, r10, r0, r0)             // Initialize r10 (a0) to 0.
+   // Function:
+   m4_asm(ADD, r14, r10, r0)            // Initialize sum register a4 with 0x0
+   m4_asm(ADDI, r12, r10, 1010)         // Store count of 10 in register a2.
+   m4_asm(ADD, r13, r10, r0)            // Initialize intermediate sum register a3 with 0
+   // Loop:
+   m4_asm(ADD, r14, r13, r14)           // Incremental addition
+   m4_asm(ADDI, r13, r13, 1)            // Increment intermediate register by 1
+   m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
+   m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
+   
+   // Optional:
+   // m4_asm(JAL, r7, 00000000000000000000) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
+   m4_define_hier(['M4_IMEM'], M4_NUM_INSTRS)
+
+   |cpu
+      @0
+         $reset = *reset;
+         $pc[31:0] = >>1$reset ? 32'b0 : >>1$pc + 32'd4;
+      @1 
+         $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
+         $imem_rd_en = !$reset;
+         $instr[31:0] = $imem_rd_data[31:0];
+         
+      ?$imem_rd_en
+         @1
+            $imem_rd_data[31:0] = /imem[$imem_rd_addr]$instr;  
+         
+         //INSTRUCTION TYPES DECODE         
+      @1
+         $is_u_instr = $instr[6:2] ==? 5'b0x101;
+         
+         $is_s_instr = $instr[6:2] ==? 5'b0100x;
+         
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b011x0 ||
+                       $instr[6:2] ==? 5'b10100;
+         
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b001x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         
+         //INSTRUCTION IMMEDIATE DECODE
+         $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                      $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:7]} :
+                      $is_b_instr ? {{20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0} :
+                      $is_u_instr ? {$instr[31:12], 12'b0} :
+                      $is_j_instr ? {{12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0} :
+                                    32'b0;
+         
+         
+         //INSTRUCTION DECODE
+         $rs2[4:0] = $instr[24:20];
+         
+         
+         //INSTRUCTION FIELD DECODE
+         $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+         ?$rs2_valid
+            $rs2[4:0] = $instr[24:20];
+            
+         $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$rs1_valid
+            $rs1[4:0] = $instr[19:15];
+         
+         $funct3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
+         ?$funct3_valid
+            $funct3[2:0] = $instr[14:12];
+            
+         $funct7_valid = $is_r_instr ;
+         ?$funct7_valid
+            $funct7[6:0] = $instr[31:25];
+            
+         $rd_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr;
+         ?$rd_valid
+            $rd[4:0] = $instr[11:7];
+         $opcode_valid = $is_r_instr || $is_i_instr || $is_u_instr || $is_j_instr || $is_b_instr || $is_s_instr;
+         ?$opcode_valid
+            $opcode[6:0] = $instr[6:0];
+         
+         //INSTRUCTION DECODE
+         $dec_bits [10:0] = {$funct7[5], $funct3, $opcode};
+         $is_beq = $dec_bits ==? 11'bx_000_1100011;
+         $is_bne = $dec_bits ==? 11'bx_001_1100011;
+         $is_blt = $dec_bits ==? 11'bx_100_1100011;
+         $is_bge = $dec_bits ==? 11'bx_101_1100011;
+         $is_bltu = $dec_bits ==? 11'bx_110_1100011;
+         $is_bgeu = $dec_bits ==? 11'bx_111_1100011;
+         $is_addi = $dec_bits ==? 11'bx_000_0010011;
+         $is_add = $dec_bits ==? 11'b0_000_0110011;
+         
+         `BOGUS_USE ($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
+         
+         //REGISTER FILE READ
+         $rf_wr_en = 1'b0;
+         $rf_wr_index[4:0] = 5'b0;
+         $rf_wr_data[31:0] = 32'b0;
+         $rf_rd_en1 = $rs1_valid;
+         $rf_rd_index1[4:0] = $rs1;
+         $rf_rd_en2 = $rs2_valid;
+         $rf_rd_index2[4:0] = $rs2;
+         //output of rf
+         $src1_value[31:0] = $rf_rd_data1;
+         $src2_value[31:0] = $rf_rd_data2;
+         
+         //ARITHMETIC AND LOGIC UNIT (ALU)
+         $result[31:0] = $is_addi ? $src1_value + $imm :
+                         $is_add ? $src1_value + $src2_value :
+                         32'bx ;
+         
+         //REGISTER FILE WRITE
+         $rf_wr_en = $rd_valid && $rd != 5'b0;
+         $rf_wr_index[4:0] = $rd;
+         $rf_wr_data[31:0] = $result;
+         
+         //BRANCH INSTRUCTIONS1
+         $taken_branch = $is_beq ? ($src1_value == $src2_value):
+                         $is_bne ? ($src1_value != $src2_value):
+                         $is_blt ? (($src1_value < $src2_value) ^ ($src1_value[31] != $src2_value[31])):
+                         $is_bge ? (($src1_value >= $src2_value) ^ ($src1_value[31] != $src2_value[31])):
+                         $is_bltu ? ($src1_value < $src2_value):
+                         $is_bgeu ? ($src1_value >= $src2_value):
+                                    1'b0;
+         `BOGUS_USE($taken_branch)
+         //BRANCH INSTRUCTIONS 2
+         $br_target_pc[31:0] = $pc +$imm;
+         
+      // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
+      //       be sure to avoid having unassigned signals (which you might be using for random inputs)
+      //       other than those specifically expected in the labs. You'll get strange errors for these.
+
+   
+   // Assert these to end simulation (before Makerchip cycle limit).
+   *passed = *cyc_cnt > 40;
+   *failed = 1'b0;
+   
+   // Macro instantiations for:
+   //  o instruction memory
+   //  o register file
+   //  o data memory
+   //  o CPU visualization
+   |cpu
+      m4+imem(@1)    // Args: (read stage)
+      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      //m4+dmem(@4)    // Args: (read/write stage)
+
+   m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
+\SV
+   endmodule
+```
+![branch2_code](https://github.com/user-attachments/assets/68d0f9b2-0714-42d2-a4de-ebd46edcc288)
+![branch2_dia](https://github.com/user-attachments/assets/1b49c26c-e79c-4d06-aa54-d363261da89f)
+
+
+### 8. Testbench
+
+when simulation passes by monitoring the value in register x10
+(containing the sum) (within @1):
+```
+*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
+```
+![tb_code](https://github.com/user-attachments/assets/dede61b8-58e4-45de-847f-dd5cf1f8e4f1)
+![tb_dia](https://github.com/user-attachments/assets/eb84d7ff-2d7a-4c30-8cb6-fcaa9e9d00a8)
 
 
 
