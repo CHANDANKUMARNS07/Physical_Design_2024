@@ -2669,6 +2669,10 @@ when simulation passes by monitoring the value in register x10
 ![tb_code](https://github.com/user-attachments/assets/dede61b8-58e4-45de-847f-dd5cf1f8e4f1)
 ![tb_dia](https://github.com/user-attachments/assets/eb84d7ff-2d7a-4c30-8cb6-fcaa9e9d00a8)
 
+# LAB 7
+
+## Pipelined RISC-V Core
+Pipelining processes increases the overall performance of the system. Thus, the previously designed cores can be pipelined. The "Timing Abstraction" feature of TL-Verilog makes it easy.<br/>
 
 
 ​
