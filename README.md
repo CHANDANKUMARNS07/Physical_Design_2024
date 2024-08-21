@@ -3096,6 +3096,8 @@ The below waveform shows the clock in my name ``` $clk_chandan```  and the outpu
 
 ![image](https://github.com/user-attachments/assets/9a24dd05-eb70-4033-ae27-616e2dc035bc)
 
+The waveform output shows the addition of 1 to 9 which gives the output as 45, which in hexadecimal is 2D.<br/>
+
 ![image](https://github.com/user-attachments/assets/71d5e761-4805-4392-a8e7-5f81326ab992)
 
 The final diagram of 5 stage implementation of RISC V core. <br/>
