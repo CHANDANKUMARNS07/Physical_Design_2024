@@ -1016,7 +1016,7 @@ The instruction fetch unit (IFU) in a central processing unit (CPU) is responsib
 
 ![image](https://github.com/user-attachments/assets/54e60e02-46c8-4fd0-abef-b419da28c9b8)
 
-Uncomment //m4+imem(@1), and //m4+cpu_viz(@4) compile, and observe log
+Uncomment //m4+imem(@1), and //m4+cpu_viz(@4) compile.<br/>
 errors.<br/>
 
 ```
