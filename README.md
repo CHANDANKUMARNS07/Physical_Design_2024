@@ -3100,6 +3100,8 @@ The waveform output shows the addition of 1 to 9 which gives the output as 45, w
 
 ![day5_result](https://github.com/user-attachments/assets/87a9a78e-2b7c-4980-947b-7e8304c110f2)
 
+![image](https://github.com/user-attachments/assets/1d69f73f-fef7-4c9a-a601-e64d8f502ebd)
+
 ![image](https://github.com/user-attachments/assets/71d5e761-4805-4392-a8e7-5f81326ab992)
 
 The final diagram of 5 stage implementation of RISC V core. <br/>
