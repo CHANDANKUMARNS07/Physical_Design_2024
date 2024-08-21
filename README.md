@@ -2663,6 +2663,8 @@ The second is targetting the pc.<br/>
 
 when simulation passes by monitoring the value in register x10
 (containing the sum) (within @1):
+The output will be the addition of 1 to 9 which is 45 and in hexadecimal 2D.
+The clk can be changed by putting ```$clk_chandan = *clk; ```  in day 4 basic risc v implementation. I have not putted that i have put it in the day 5 of pipelined risc v core implementation and also the waveform has been put for day 5 work as it is fully completed work.<br/>
 ```
 *passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
 ```
