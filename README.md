@@ -2840,7 +2840,7 @@ $result[31:0] = ($is_addi || $is_load || $is_s_instr) ? $src1_value + $imm :
    m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic. @4 would work for all labs.
 ```
 
-### PIPELINE OF RISC-V 5 cycle STAGES 
+### PIPELINE OF RISC-V 5 STAGES 
 
 ![image](https://github.com/user-attachments/assets/221805b6-b3a6-4443-8dee-4a1b0ca1ee38)
 
@@ -3086,18 +3086,27 @@ The implementation of the above code in makerchip ide [Final code.](makerchip.co
 
 ![image](https://github.com/user-attachments/assets/13ac3ad2-189c-42b9-a86c-8bea1245b406)
 
-![day5_viz](https://github.com/user-attachments/assets/baa39a68-6910-4aa3-8645-bdccb992bca5)
+The output is available after 60 cycles.<br/>
 
 ![day5_viz1](https://github.com/user-attachments/assets/fa41c730-a461-4e3c-83ca-fac1d49c0b9f)
+
+The below waveform shows the clock in my name ``` $clk_chandan```  and the output result.<br/>
 
 ![image](https://github.com/user-attachments/assets/9a24dd05-eb70-4033-ae27-616e2dc035bc)
 
 ![image](https://github.com/user-attachments/assets/71d5e761-4805-4392-a8e7-5f81326ab992)
 
+The final diagram of 5 stage implementation of RISC V core. <br/>
+
 ​![day5_diag](https://github.com/user-attachments/assets/88892464-ac33-449c-8125-314945416650)
 
-![day_5_sandpip](https://github.com/user-attachments/assets/357aa45d-aeb2-48e4-a446-46df27dddbcd)
+### Code Comparison
 
+The SandPiper Compiler generated ~90,000 characters of SystemVerilog from ~25,000 characters of TL-Verilog. Among the ~90,000 characters of SystemVerilog, only ~18,000 is actual logic.
+The snippet below shows the code comparison of TL-Verilog and SystemVerilog.<br/>
+
+![day_5_sandpip](https://github.com/user-attachments/assets/357aa45d-aeb2-48e4-a446-46df27dddbcd)
+Summary: The complete implementation of sequential calculator has been done and also the pipelining has been implemented on it The complete implementation of riscv has been done and problems of readwrite hazard and branch hazard and load hazard had been addressed. <br/>
 
 
 
