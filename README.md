@@ -9,6 +9,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 5.[LAB 5](#lab-5)<br/>
 6.[LAB 6](#lab-6)<br/>
 7.[LAB 7](#lab-7)<br/>
+8.[LAB 8](#lab-8)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -2885,7 +2886,7 @@ The code snippet of complete RISC-V implementation.<br/>
    m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
    
    m4_asm(SW, r0, r10, 10000)           // Store final result from r10(a0) to memory at address 16 (0x10)
-   m4_asm(LW, r17, r0, 10000)           // Load in register x7 value from memory, address 16 (0x10)
+   m4_asm(LW, r15, r0, 10000)           // Load in register x7 value from memory, address 16 (0x10)
    
    
    // Optional:
@@ -3116,9 +3117,127 @@ The snippet below shows the code comparison of TL-Verilog and SystemVerilog.<br/
 ![day_5_sandpip](https://github.com/user-attachments/assets/357aa45d-aeb2-48e4-a446-46df27dddbcd)
 Summary: The complete implementation of sequential calculator has been done and also the pipelining has been implemented on it The complete implementation of riscv has been done and problems of readwrite hazard and branch hazard and load hazard had been addressed. <br/>
 
+# LAB 8
+## Conversion of TLV code into Verilog using the Sandpiper-SaaS compiler. After the conversion, perform pre-synthesis simulations with the GTKWave simulator to verify the design.
 
+The RISC-V processor was designed and created by the TL-Verilog language in the Maketchip IDE. Now, we need a way to compile and transform it to the Verilog language for FPGA implementation. The sandpiper-saas compiler was used to do the job. The pre-synthesis simulation was carried out using the GTKWave simulkator.<br/>
 
+Make changes in the tlv code whereever required. Such as including the top module, making corrections in case inequalities, removing x in the inputs and giving the full inputs to perform the simulation without any error and also we can comment the cpuviz memory line.<br/>
+ 
+### Steps to be followed are as shown as below :- 
+Step 1:<br/>
+Install the Required Packages:<br/>
+```
+sudo apt install make python python3 python3-pip git iverilog gtkwave
+cd ~
+sudo apt-get install python3-venv
+python3 -m venv .venv
+source ~/.venv/bin/activate
+pip3 install pyyaml click sandpiper-saas
+```
+Step 2:<br/>
+Now we can clone this repository in an arbitrary directory (we'll choose home directory here):<br/>
+```
+git clone https://github.com/manili/VSDBabySoC.git
+```
+Step 3:<br/>
+Replace the .tlv file in the VSDBabySoC/src/module folder with our RISC-V design .tlv file which we want to convert into verilog and we can give our own name too.<br/>
+```
+cd /home/vsduser/VSDBabySoC/
+sandpiper-saas -i ./src/module/riscv_chandan.tlv -o riscv_chandan.v --bestsv --noline -p verilog --outdir ./src/module/
+```
+Step 4:<br/>
+Compile and simulate RISC-V design.<br/>
+Before executing the below command first create the directory named 'output' so that the pre synthesis file can be putted their.<br/>
+```
+mkdir output
+iverilog -o output/pre_synth_sim.out -DPRE_SYNTH_SIM src/module/testbench.v -I src/include -I src/module
+```
+Step 5:<br/>
+The result of the simulation (i.e. pre_synth_sim.vcd) will be stored in the output/pre_synth_sim directory.<br/>
+```
+cd output
+./pre_synth_sim.out
+```
+Step 6:<br/>
+To open the .vcd simulation file through GTKWave simulation tool.<br/>
+```
+gtkwave pre_synth_sim.vcd
+```
+![terminal](https://github.com/user-attachments/assets/c9439e59-9f30-4206-a497-a3491421b513)
+![terminal1](https://github.com/user-attachments/assets/beaa49c6-b306-44d6-948f-b82cf20dd9e3)
+![terminal2](https://github.com/user-attachments/assets/3e5684ff-fa59-4dc3-9fad-0fe9a7c24486)
+
+### The Testbench used for the riscv core is shown as below
+
+![testbench](https://github.com/user-attachments/assets/b23e89e2-66be-4b42-a716-aadc003504ee)
+```
+`timescale 1ns / 1ps
+`ifdef PRE_SYNTH_SIM
   
+   `include "riscv_chandan.v"
+   `include "clk_gate.v"
+
+`endif
+
+module tb;
+ wire [9:0] OUT;
+reg CLK;
+reg reset; 
+
+   riscv_chandan uut (
+      .OUT(OUT),.CLK(CLK),
+      .reset(reset));
+     
+always #5 CLK=~CLK;
+   initial begin
+     CLK=0;
+      #20 reset = 1;
+      #100 reset = 0;
+   end
+   
+   initial begin
+`ifdef PRE_SYNTH_SIM
+      $dumpfile("pre_synth_sim.vcd");
+
+`endif
+      $dumpvars(0, tb);
+   end
+ 
+   initial begin
+      
+  #20000;
+      $finish;
+   end
+   
+endmodule
+```
+The following diagram contains:-<br/>
+
+CPU_clk_chandan: This is the clock input to the RISC-V core.<br/>
+reset: This is the input reset signal to the RISC-V core.<br/>
+OUT[9:0]: This is the 10-bit output [9:0] OUT port of the RISC-V core.<br/>
+
+In the below shown waveform the output for me it is getting like once it is reached the final value which is 2D then afterwards it is again starting from 0 and counts untill 2D.<br/>
+
+![waveform](https://github.com/user-attachments/assets/c06aff2f-02e5-4c42-b467-24e49bd6f087)
+![waveform1](https://github.com/user-attachments/assets/4da47309-9d09-4a93-86b4-11f71626b242)
+![waveform2](https://github.com/user-attachments/assets/8dde47c0-58b3-4ccb-bad0-ee6cff296f0c)
+![waveform3](https://github.com/user-attachments/assets/4f0e543d-08a1-4dcf-938d-ed615434f6d5)
+
+Makerchip IDE simulation results for comparison
+
+
+![image](https://github.com/user-attachments/assets/9a24dd05-eb70-4033-ae27-616e2dc035bc)
+
+![day5_result](https://github.com/user-attachments/assets/87a9a78e-2b7c-4980-947b-7e8304c110f2)
+
+![image](https://github.com/user-attachments/assets/1d69f73f-fef7-4c9a-a601-e64d8f502ebd)
+
+![image](https://github.com/user-attachments/assets/71d5e761-4805-4392-a8e7-5f81326ab992)
+
+By comparing both the simulations the cyc_cnt is seen in the CPU_result_a3[31:0] and the result is seen in the OUT[9:0].<br/>
+
   
   
   
