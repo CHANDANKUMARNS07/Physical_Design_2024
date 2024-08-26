@@ -3168,7 +3168,7 @@ gtkwave pre_synth_sim.vcd
 ![terminal1](https://github.com/user-attachments/assets/beaa49c6-b306-44d6-948f-b82cf20dd9e3)
 ![terminal2](https://github.com/user-attachments/assets/3e5684ff-fa59-4dc3-9fad-0fe9a7c24486)
 
-### The Testbench used for the riscv core is shown as below
+### The Testbench used is shown as below
 
 ![testbench](https://github.com/user-attachments/assets/b23e89e2-66be-4b42-a716-aadc003504ee)
 ```
