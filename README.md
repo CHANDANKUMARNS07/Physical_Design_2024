@@ -3122,7 +3122,7 @@ Summary: The complete implementation of sequential calculator has been done and 
 
 The RISC-V processor was designed and created by the TL-Verilog language in the Maketchip IDE. Now, we need a way to compile and transform it to the Verilog language for FPGA implementation. The sandpiper-saas compiler was used to do the job. The pre-synthesis simulation was carried out using the GTKWave simulkator.<br/>
 
-Make changes in the tlv code whereever required. Such as including the top module, making corrections in case inequalities, removing x in the inputs and giving the full inputs to perform the simulation without any error and also we can comment the cpuviz memory line.<br/>
+Make changes in the tlv code whereever required. Such as including the top module from shivani shah's github, making corrections in case inequalities, removing x in the inputs and giving the full inputs to perform the simulation without any error and also we can comment the cpuviz memory line.<br/>
  
 ### Steps to be followed are as shown as below :- 
 Step 1:<br/>
