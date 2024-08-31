@@ -10,6 +10,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 6.[LAB 6](#lab-6)<br/>
 7.[LAB 7](#lab-7)<br/>
 8.[LAB 8](#lab-8)<br/>
+9.[LAB 9](#lab-9)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -3238,6 +3239,148 @@ Makerchip IDE simulation results for comparison
 
 By comparing both the simulations the cyc_cnt is seen in the CPU_result_a3[31:0] and the result is seen in the OUT[9:0].<br/>
 
+# LAB 9
+## TASK 1
+### Installing iverilog, gtkwave, yosys, OpenSTA  in our personal machines.<br/>
+
+ The following are the steps to install the tools which is used for simulation.<br/>
+ 
+  * Iverilog<br/>
+  Steps to install iverilog <br/>
+  ```
+    sudo apt-get update
+    sudo apt-get install iverilog
+  ```
+![gth](https://github.com/user-attachments/assets/b1a1b350-9cf1-44d0-a3b2-ebde2ae722af)
+
+![iverilog](https://github.com/user-attachments/assets/87079bc8-0e3f-4196-b8c6-f5e10f57d31e)
+
+* Gtkwave<br/>
+Steps to install gtkwave<br/>
+```
+sudo apt-get update
+sudo apt install gtkwave
+```
+![7](https://github.com/user-attachments/assets/8a6b2e75-31f4-453f-8c78-750d4493d856)
+
+![9](https://github.com/user-attachments/assets/390323de-4c65-4f30-9ad6-d14e9ec6f691)
+
+* Yosys<br/>
+Steps to install yosys<br/>
+```
+sudo apt-get update
+ git clone https://github.com/YosysHQ/yosys.git
+ cd yosys
+ sudo apt install make (If make is not installed please install it) 
+ sudo apt-get install build-essential clang bison flex \
+    libreadline-dev gawk tcl-dev libffi-dev git \
+    graphviz xdot pkg-config python3 libboost-system-dev \
+    libboost-python-dev libboost-filesystem-dev zlib1g-dev
+ make config-gcc
+ make 
+ sudo make install
+```
+![2](https://github.com/user-attachments/assets/09ff1666-8b6b-4741-98e1-6596b69aefa6)
+![4](https://github.com/user-attachments/assets/140c2e1f-8de2-4890-9191-471a9e3a9dff)
+![5](https://github.com/user-attachments/assets/3da8edbb-66f7-4f14-9c2b-9b5869471070)
+![6](https://github.com/user-attachments/assets/37fdde42-bfb4-4142-aa9d-d52b0f69a3e7)
+![8](https://github.com/user-attachments/assets/68ee80c6-6bb3-450e-b1e6-c428b50b12ca)
+
+* OpenSTA <br/>
+Steps to install opensta<br/>
+```
+git clone https://github.com/parallaxsw/OpenSTA.git
+cd OpenSTA
+mkdir build
+cd build
+sudo apt-get install cmake clang gcctcl swig bison flex
+cmake ..
+make
+```
+![13](https://github.com/user-attachments/assets/9fb5171d-353f-4bce-ad58-4cc9ad94c9ce)
+![12](https://github.com/user-attachments/assets/957149c8-74b5-4bbd-9421-c55318dde654)
+
+## TASK 2
+#### Downloading the files from https://github.com/Subhasis-Sahu/BabySoC_Simulation/ link and editing the vsdbabysoc top level so that it links to my rvmyth code and produce the output for that.<br/>
+
+Before editing the code i checked the same code for seeing the working of tools installed previously.<br/>
+And i got the same output as the https://github.com/manili/VSDBabySoC?tab=readme-ov-file#step-by-step-modeling-walkthrough link and verified that the tool is working.<br/>
+
+As mentioned in the previous lab task the same procedure to be followed for compiling the code and getting the output.<br/>
+```
+sudo apt install make python python3 python3-pip git iverilog gtkwave
+cd ~
+sudo apt-get install python3-venv
+python3 -m venv .venv
+source ~/.venv/bin/activate
+pip3 install pyyaml click sandpiper-saas
+
+git clone https://github.com/manili/VSDBabySoC.git
+
+cd /home/vsduser/VSDBabySoC/
+sandpiper-saas -i ./src/module/*.tlv -o rvmyth.v --bestsv --noline -p verilog --outdir ./src/module/
+
+mkdir output
+iverilog -o output/pre_synth_sim.out -DPRE_SYNTH_SIM src/module/testbench.v -I src/include -I src/module
+
+cd output
+./pre_synth_sim.out
+
+gtkwave pre_synth_sim.vcd
+
+```
+
+![17](https://github.com/user-attachments/assets/99bf5c50-f42d-4bfc-9d0d-bedc9e7b54d3)
+
+![14_vsdbabysoc_waveform](https://github.com/user-attachments/assets/dde11842-6283-4068-8435-684abe74ab0f)
+
+Now, i changed vsdbabysoc top level and added my .v generated file from my.tlv file and in extra added the clk in my name and included the files of .v .<br/>
+After editing, the same steps are to be followed to see the output in the gtkwave by changing the file name.<br/>
+```
+sudo apt install make python python3 python3-pip git iverilog gtkwave
+cd ~
+sudo apt-get install python3-venv
+python3 -m venv .venv
+source ~/.venv/bin/activate
+pip3 install pyyaml click sandpiper-saas
+
+git clone https://github.com/manili/VSDBabySoC.git
+
+cd /home/vsduser/VSDBabySoC/
+sandpiper-saas -i ./src/module/*.tlv -o riscv_chandan.v --bestsv --noline -p verilog --outdir ./src/module/
+
+mkdir output
+iverilog -o output/pre_synth_sim.out -DPRE_SYNTH_SIM src/module/testbench.v -I src/include -I src/module
+
+cd output
+./pre_synth_sim.out
+
+gtkwave pre_synth_sim.vcd
+```
+
+![15](https://github.com/user-attachments/assets/4c05edfb-1fb9-4997-8d61-0e5c7dc2e536)
+![16](https://github.com/user-attachments/assets/3e907c4b-4359-481d-a8d5-c9661127cb87)
+![22](https://github.com/user-attachments/assets/d017472d-384a-40d5-b382-d1a168ecb6df)
+
+The things changed in testbench and vsdbabysoc file is shown below:- <br/>
+![25](https://github.com/user-attachments/assets/db5d55e6-bf71-46de-8cc1-f0e1ee8a73ec)
+![24](https://github.com/user-attachments/assets/8f9ae3ef-a060-4625-91ee-0b454bf2c148)
+
+After the above steps are completed the output will be is as shown below.<br/>
+
+![20](https://github.com/user-attachments/assets/1d7edf3f-b218-4613-be40-2056a8e76358)
+
+Zoomed view
+![21](https://github.com/user-attachments/assets/0db20891-d85d-4f0c-ab00-d0b0612857d0)
+
+Summary :- In this task the output seen is PLL clock input signal, PLL output signal, your individual clock (rvmyth input clock signal), rvmyth 10-bit output signals, DAC output analog waveform.
+
+
+
   
+    
+
+
+
   
   
