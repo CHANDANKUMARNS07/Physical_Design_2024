@@ -3263,7 +3263,7 @@ sudo apt install gtkwave
 ```
 ![7](https://github.com/user-attachments/assets/8a6b2e75-31f4-453f-8c78-750d4493d856)
 
-![9](https://github.com/user-attachments/assets/390323de-4c65-4f30-9ad6-d14e9ec6f691)
+![image](https://github.com/user-attachments/assets/34a4443f-1e32-4a92-a28a-5c624c796475)
 
 * Yosys<br/>
 Steps to install yosys<br/>
@@ -3298,7 +3298,7 @@ cmake ..
 make
 ```
 ![13](https://github.com/user-attachments/assets/9fb5171d-353f-4bce-ad58-4cc9ad94c9ce)
-![12](https://github.com/user-attachments/assets/957149c8-74b5-4bbd-9421-c55318dde654)
+![image](https://github.com/user-attachments/assets/d4e51373-2894-42cb-a7e3-58e8bf304e74)
 
 ## TASK 2
 #### Downloading the files from https://github.com/Subhasis-Sahu/BabySoC_Simulation/ link and editing the vsdbabysoc top level so that it links to my rvmyth code and produce the output for that.<br/>
