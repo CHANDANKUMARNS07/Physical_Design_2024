@@ -3303,6 +3303,53 @@ make
 ## TASK 2
 #### Downloading the files from https://github.com/Subhasis-Sahu/BabySoC_Simulation/ link and editing the vsdbabysoc top level so that it links to my rvmyth code and produce the output for that.<br/>
 
+# Introduction to the VSDBabySoC
+
+VSDBabySoC is a small yet powerful RISCV-based SoC. The main purpose of designing such a small SoC is to test three open-source IP cores together for the first time and calibrate the analog part of it. VSDBabySoC contains one RVMYTH microprocessor, an 8x-PLL to generate a stable clock, and a 10-bit DAC to communicate with other analog devices.
+
+  ![vsdbabysoc_block_diagram](images/vsdbabysoc_block_diagram.png)
+
+## Problem statement
+
+This work discusses the different aspects of designing a small SoC based on RVMYTH (a RISCV-based processor). This SoC will leverage a PLL as its clock generator and controller and a 10-bit DAC as a way to talk to the outside world. Other electrical devices with proper analog input like televisions, and mobile phones could manipulate DAC output and provide users with music sound or video frames. At the end of the day, it is possible to use this small fully open-source and well-documented SoC which has been fabricated under Sky130 technology, for educational purposes.
+
+## What is SoC
+
+An SoC is a single-die chip that has some different IP cores on it. These IPs could vary from microprocessors (completely digital) to 5G broadband modems (completely analog).
+
+## What is RVMYTH
+
+RVMYTH core is a simple RISCV-based CPU, introduced in a workshop by RedwoodEDA and VSD. During a 5-day workshop students (including middle-schoolers) managed to create a processor from scratch. The workshop used the TLV for faster development. All of the present and future contributions to the IP will be done by students and under open-source licenses.
+
+## What is PLL
+
+A phase-locked loop or PLL is a control system that generates an output signal whose phase is related to the phase of an input signal. PLLs are widely used for synchronization purposes, including clock generation and distribution.
+
+## What is DAC
+
+A digital-to-analog converter or DAC is a system that converts a digital signal into an analog signal. DACs are widely used in modern communication systems enabling the generation of digitally-defined transmission signals. As a result, high-speed DACs are used for mobile communications and ultra-high-speed DACs are employed in optical communications systems.
+
+# VSDBabySoC Modeling
+
+Here we are going to model and simulate the VSDBabySoC using `iverilog`, then we will show the results using `gtkwave` tool. Some initial input signals will be fed into `vsdbabysoc` module that make the pll start generating the proper `CLK` for the circuit. The clock signal will make the `rvmyth` to execute instructions in its `imem`. As a result the register `r17` will be filled with some values cycle by cycle. These values are used by dac core to provide the final output signal named `OUT`. So we have 3 main elements (IP cores) and a wrapper as an SoC and of-course there would be also a testbench module out there.
+
+Please note that in the following sections we will mention some repos that we used to model the SoC. However the main source code is resided in [Source-Code Directory](src) and these modules are in [Modules Sub-Directory](src/module).
+
+## RVMYTH modeling
+
+As we mentioned in [What is RVMYTH](#what-is-rvmyth) section, RVMYTH is designed and created by the TL-Verilog language. So we need a way for compile and trasform it to the Verilog language and use the result in our SoC. Here the `sandpiper-saas` could help us do the job.
+
+  [Here](https://github.com/shivanishah269/risc-v-core) is the repo we used as a reference to model the RVMYTH
+
+## PLL and DAC modeling
+
+It is not possible to sythesis an analog design with Verilog, yet. But there is a chance to simulate it using `real` datatype. We will use the following repositories to model the PLL and DAC cores:
+
+  1. [Here](https://github.com/vsdip/rvmyth_avsdpll_interface) is the repo we used as a reference to model the PLL
+  2. [Here](https://github.com/vsdip/rvmyth_avsddac_interface) is the repo we used as a reference to model the DAC
+
+**CAUTION:** In the beginning of the project, we get our verilog model of the PLL from [here](https://github.com/vsdip/rvmyth_avsdpll_interface). However, by proceeding the project to the physical design flow we realize that this model needs a little changes to become sufficient for a real IP core. So we changed it a little and created a new model named `AVSDPLL` based on [this](https://github.com/lakshmi-sathi/avsdpll_1v8) IP
+
 Before editing the code i checked the same code for seeing the working of tools installed previously.<br/>
 And i got the same output as the https://github.com/manili/VSDBabySoC?tab=readme-ov-file#step-by-step-modeling-walkthrough link and verified that the tool is working.<br/>
 
@@ -3368,10 +3415,15 @@ The things changed in testbench and vsdbabysoc file is shown below:- <br/>
 
 After the above steps are completed the output will be is as shown below.<br/>
 
+![pll](https://github.com/user-attachments/assets/7f55cc9e-e20d-4bfb-b181-02b07466347e)
+
+
 ![20](https://github.com/user-attachments/assets/1d7edf3f-b218-4613-be40-2056a8e76358)
 
 Zoomed view
 ![21](https://github.com/user-attachments/assets/0db20891-d85d-4f0c-ab00-d0b0612857d0)
+
+For verifying that i have done in my own machine is that my name in the terminal is "MS2024007@ckns" please do check it.
 
 Summary :- In this task the output seen is PLL clock input signal, PLL output signal, your individual clock (rvmyth input clock signal), rvmyth 10-bit output signals, DAC output analog waveform.
 
@@ -3380,7 +3432,15 @@ Summary :- In this task the output seen is PLL clock input signal, PLL output si
   
     
 
+## References:
 
+*  https://forgefunder.com/~kunal/riscv_workshop.vdi
+*  https://gcc.gnu.org/onlinedocs/gcc/RISC-V-Options.html
+*  https://github.com/vinayrayapati/rv32i
+*  [https://github.com/stevehoover](https://github.com/stevehoover/RISC-V_MYTH_Workshop)
+*  https://makerchip.com/sandbox
+*  https://gcc.gnu.org/onlinedocs/gcc/RISC-V-Options.html
+*  https://github.com/manili/VSDBabySoC.git
 
   
   
