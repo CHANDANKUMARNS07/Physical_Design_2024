@@ -3364,7 +3364,7 @@ pip3 install pyyaml click sandpiper-saas
 
 git clone https://github.com/manili/VSDBabySoC.git
 
-cd /home/vsduser/VSDBabySoC/
+cd /home/iiitb/VSDBabySoC/
 sandpiper-saas -i ./src/module/*.tlv -o rvmyth.v --bestsv --noline -p verilog --outdir ./src/module/
 
 mkdir output
@@ -3393,7 +3393,7 @@ pip3 install pyyaml click sandpiper-saas
 
 git clone https://github.com/manili/VSDBabySoC.git
 
-cd /home/vsduser/VSDBabySoC/
+cd /home/iiitb/VSDBabySoC/
 sandpiper-saas -i ./src/module/*.tlv -o riscv_chandan.v --bestsv --noline -p verilog --outdir ./src/module/
 
 mkdir output
