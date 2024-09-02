@@ -3307,7 +3307,7 @@ make
 
 VSDBabySoC is a small yet powerful RISCV-based SoC. The main purpose of designing such a small SoC is to test three open-source IP cores together for the first time and calibrate the analog part of it. VSDBabySoC contains one RVMYTH microprocessor, an 8x-PLL to generate a stable clock, and a 10-bit DAC to communicate with other analog devices.
 
-  ![vsdbabysoc_block_diagram](images/vsdbabysoc_block_diagram.png)
+![babysoc](https://github.com/user-attachments/assets/f4f7b91f-9d7c-4dbe-bb2c-77bc2d964d50)
 
 ## Problem statement
 
@@ -3413,7 +3413,7 @@ The things changed in testbench and vsdbabysoc file is shown below:- <br/>
 ![25](https://github.com/user-attachments/assets/db5d55e6-bf71-46de-8cc1-f0e1ee8a73ec)
 ![24](https://github.com/user-attachments/assets/8f9ae3ef-a060-4625-91ee-0b454bf2c148)
 
-After the above steps are completed the output will be is as shown below.<br/>
+After the above steps are completed the output will be is as shown below waveform it consists of pll input and output signal and dac's output signal and also the clock in my name and reset signal.<br/>
 
 ![pll](https://github.com/user-attachments/assets/7f55cc9e-e20d-4bfb-b181-02b07466347e)
 
@@ -3423,7 +3423,7 @@ After the above steps are completed the output will be is as shown below.<br/>
 Zoomed view
 ![21](https://github.com/user-attachments/assets/0db20891-d85d-4f0c-ab00-d0b0612857d0)
 
-For verifying that i have done in my own machine is that my name in the terminal is "MS2024007@ckns" please do check it.
+For verifying that i have done in my own machine is that my name in the terminal is "MS2024007@ckns7" please do check it.
 
 Summary :- In this task the output seen is PLL clock input signal, PLL output signal, your individual clock (rvmyth input clock signal), rvmyth 10-bit output signals, DAC output analog waveform.
 
