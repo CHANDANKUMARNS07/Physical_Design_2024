@@ -4825,6 +4825,9 @@ In this case there is a synthesis and simulation mismatch. While performing synt
 *  https://makerchip.com/sandbox
 *  https://gcc.gnu.org/onlinedocs/gcc/RISC-V-Options.html
 *  https://github.com/manili/VSDBabySoC.git
+*  https://github.com/KanishR1/Introduction-to-ASIC-Flow.git
+*  https://github.com/bhargav-vlsi/ASIC-Design-IIITB.git
+*  https://github.com/kunalg123/sky130RTLDesignAndSynthesisWorkshop.git
 
   
   
