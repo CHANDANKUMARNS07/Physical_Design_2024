@@ -4336,7 +4336,7 @@ endmodule
 ```
 The above code infers the circuit as shown below :
 
-![sq_opt_1](./images/week_2_day_3/sq_opt_1.png)
+![us_opt](./images/week_2_day_3/us_opt.png)
 
 Since this code doesn't need optimisation it will infer a D flip-flop with asynchronous reset as shown above.
 
