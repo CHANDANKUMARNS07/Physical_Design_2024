@@ -3518,7 +3518,7 @@ gtkwave vcdfile.vcd
 Below represents sample design verilog codes.<br/>
 To get through these files just type the below commands in terminal:<br/>
 ```
-cd PD/sky130RTLDesignAndSynthesisWorkshop/verilog_files/
+cd home/ms2024007/PD/sky130RTLDesignAndSynthesisWorkshop/verilog_files/
 ls
 ```
 ![verilog_files](https://github.com/user-attachments/assets/05d5a200-62ee-4069-85ff-ff867827a85e)
