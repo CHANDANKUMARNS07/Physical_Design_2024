@@ -4172,6 +4172,7 @@ module opt_check2 (input a , input b , output y);
 endmodule
 ```
 The above code infers a multiplexer as shown below :
+![image](https://github.com/user-attachments/assets/d705fffd-5ab2-4969-b00b-24c1e931cc3b)
 
 
 Since one of the inputs of the multiplexer is always connected to the logic 1 it will infer an OR gate on optimisation. The OR gate will be NAND implementation since NOR gate has stacked pmos while NAND implementation has stacked nmos.
