@@ -11,6 +11,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 7.[LAB 7](#lab-7)<br/>
 8.[LAB 8](#lab-8)<br/>
 9.[LAB 9](#lab-9)<br/>
+10.[LAB 10](#lab-10)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -3426,6 +3427,246 @@ Zoomed view
 For verifying that i have done in my own machine is that my name in the terminal is "MS2024007@ckns7" please do check it.
 
 Summary :- In this task the output seen is PLL clock input signal, PLL output signal, your individual clock (rvmyth input clock signal), rvmyth 10-bit output signals, DAC output analog waveform.
+
+# LAB 10
+## TASK 1
+### Installing the tools which are not installed in previous lab 
+### NGSPICE
+The following are the commands for installing the ngspice:<br/>
+```
+wget https://sourceforge.net/projects/ngspice/files/ngspice-43.tar.gz
+tar -zxvf ngspice-43.tar.gz
+cd ngspice-43
+mkdir release
+cd release
+../configure  --with-x --with-readline=yes --disable-debug
+make
+sudo make install
+```
+![ngspice](https://github.com/user-attachments/assets/85ec9fae-084f-4082-9113-6a9ba0fe85aa)
+
+### MAGIC 
+The following are the commands to install the magic tool:<br/>
+```
+sudo apt-get install m4
+sudo apt-get install tcsh
+sudo apt-get install csh
+sudo apt-get install libx11-dev
+sudo apt-get install tcl-dev tk-dev
+sudo apt-get install libcairo2-dev
+sudo apt-get install mesa-common-dev libglu1-mesa-dev
+sudo apt-get install libncurses-dev
+git clone https://github.com/RTimothyEdwards/magic
+cd magic
+./configure
+make
+make install
+```
+![magic](https://github.com/user-attachments/assets/8e8fca21-4076-48da-8ed7-1bd051690c77)
+
+### OPENLANE
+The followiing are the steps to install openlane:<br/>
+```
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt install -y build-essential python3 python3-venv python3-pip make git
+
+# Docker Installation : 
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+
+sudo apt install docker-ce docker-ce-cli containerd.io
+
+sudo docker run hello-world
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+sudo reboot 
+
+# After reboot
+docker run hello-world
+```
+### Steps to install OpenLane, PDKs and Tools
+```
+cd $HOME
+git clone https://github.com/The-OpenROAD-Project/OpenLane
+cd OpenLane
+make
+make test
+```
+### TASK 2
+### DAY 1 : Introduction to Verilog RTL Design and Synthesis
+#### Overview
+This session is about steps followed to compile and simulate verilog design and testbench codes using iverilog tool. This section also deals with graphical waveform viewer tool called gtkwave and synthesis tool called yosys and its steps to produce netlist from design file.<br/>
+
+Sample Verilog simulation<br/>
+This session takes an example of 2x1 multiplexer (verilog design and test bench) to demonstrate iverilog compilation and gtkwave waveform viewer.<br/>
+
+The verilog codes are taken from github repository:
+https://github.com/kunalg123/sky130RTLDesignAndSynthesisWorkshop.git<br/>
+
+Following is syntax for compilation and execution of verilog codes to generation outputs.<br/>
+```
+iverilog designfile.v testbench.v
+./aout
+gtkwave vcdfile.vcd
+```
+Below represents sample design verilog codes.<br/>
+To get through these files just type the below commands in terminal:<br/>
+```
+cd PD/sky130RTLDesignAndSynthesisWorkshop/verilog_files/
+ls
+```
+![verilog_files](https://github.com/user-attachments/assets/05d5a200-62ee-4069-85ff-ff867827a85e)
+![verilog_files_1](https://github.com/user-attachments/assets/3c1a8d9f-2bc2-432e-9d46-5748a0bd56fe)
+
+### Standard cell library :- 
+It is a collection of well defined and appropriately characterized logic gates that can be used to implement a digital design. Timing data of standard cells is provided in the Liberty format.<br/>
+
+The lib directory contains the library file sky130_fd_sc_hd__tt_025C_1v80.lib. Libraries in the SKY130 PDK are named using the following scheme:<br/>
+<Process_name><Library_Source_Abbreviation><Library_type_abbreviation>[_<Library_name]<br/>
+
+sky130 - Process Technology of the PDK sky130<br/>
+fd - SkyWater Foundry<br/>
+sc - Digital standard cells<br/>
+hd - High density<br/>
+tt - Typical Timing<br/>
+025C - 25 degree celsius Temperature<br/>
+1v80 - 1.8V Supply Voltage<br/>
+
+### Demostration of the Icarus Verilog and GTKWave
+Change the current working directory to the directory containing the Verilog files using the following command :<br/>
+```
+cd home/ms2024007/PD/sky130RTLDesignAndSynthesisWorkshop/verilog_files/
+```
+Simulate the RTL design and testbench using the following command:
+```
+iverilog good_mux.v tb_good_mux.v 
+./a.out
+gtkwave tb_good_mux.vcd
+```
+The code for 2 x 1 mux is:-<br/>
+```
+module good_mux (input i0 , input i1 , input sel , output reg y);
+always @ (*)
+begin
+	if(sel)
+		y <= i1;
+	else 
+		y <= i0;
+end
+endmodule
+```
+Testbench :-<br/>
+```
+`timescale 1ns / 1ps
+module tb_good_mux;
+	// Inputs
+	reg i0,i1,sel;
+	// Outputs
+	wire y;
+
+        // Instantiate the Unit Under Test (UUT)
+	good_mux uut (
+		.sel(sel),
+		.i0(i0),
+		.i1(i1),
+		.y(y)
+	);
+
+	initial begin
+	$dumpfile("tb_good_mux.vcd");
+	$dumpvars(0,tb_good_mux);
+	// Initialize Inputs
+	sel = 0;
+	i0 = 0;
+	i1 = 0;
+	#300 $finish;
+	end
+
+always #75 sel = ~sel;
+always #10 i0 = ~i0;
+always #55 i1 = ~i1;
+endmodule
+```
+![gtkwave](https://github.com/user-attachments/assets/57d94c3d-aaca-44f5-a596-6da2b7fa2b31)
+
+Waveform :-<br/>
+
+![gtk_wave_2_1_mux](https://github.com/user-attachments/assets/75155189-4293-491d-929a-6de14a4ac5ca)
+
+### Yosys synthesis process
+This section explains the concept of yosys library cells and process of generating netlist using yosys tool. The library contains variety of cells with various operating speeds for different applications and avoid violations.<br/>
+Following represents various commands used to generate netlist for given design:-<br/>
+```
+yosys> read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+yosys> read_verilog good_mux.v
+yosys> synth -top good_mux
+yosys> abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+yosys> show
+yosys> write_verilog good_mux_netlist.v
+yosys> write_verilog -noattr good_mux_netlist.v
+```
+The general way is:-
+```
+yosys> read_liberty -lib <path to lib file>
+yosys> read_verilog <path to verilog file>
+yosys> synth -top <top_module_name>
+yosys> abc -liberty <path to lib file>
+yosys> show
+yosys> write_verilog <file_name_netlist.v>
+yosys> write_verilog -noattr <file_name_netlist.v>
+```
+Below represents schematic represented by yosys tool for given design:-<br/>
+![mux_synth_dia](https://github.com/user-attachments/assets/e4240551-72da-44e2-b293-9c45ff4f73d9)
+
+Below represents netlist represented by yosys tool for given design.<br/>
+```
+/* Generated by Yosys 0.45+3 (git sha1 d56716417, g++ 11.4.0-1ubuntu1~22.04 -fPIC -O3) */
+
+module good_mux(i0, i1, sel, y);
+  wire _0_;
+  wire _1_;
+  wire _2_;
+  wire _3_;
+  input i0;
+  wire i0;
+  input i1;
+  wire i1;
+  input sel;
+  wire sel;
+  output y;
+  wire y;
+  sky130_fd_sc_hd__mux2_1 _4_ (
+    .A0(_0_),
+    .A1(_1_),
+    .S(_2_),
+    .X(_3_)
+  );
+  assign _0_ = i0;
+  assign _1_ = i1;
+  assign _2_ = sel;
+  assign y = _3_;
+endmodule
+```
+![mux_netlist](https://github.com/user-attachments/assets/5f0d8607-308e-4929-933d-432d67cf45c5)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
