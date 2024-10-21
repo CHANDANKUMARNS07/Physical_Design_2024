@@ -4028,18 +4028,549 @@ module mult8 (input [2:0] a , output [5:0] y);
 	assign y = a * 9;
 endmodule
 ```
-In this design the 3-bit input number "a" is multiplied by 9 i.e.,(a*9) which can be re-written as (a\*8) + a . The term (a\*8) is nothing but a left shifting the number a by three bits. Consider that a = a2 a1 a0. (a\*8) results in a2 a1 a0 0 0 0. (a\*9)=(a\*8)+a = a2 a1 a0 a2 a1 a0 = aa(in 6 bit format). Hence in this case no hardware realization is required. The synthesized netlist of this design is shown below:
+In this design the 3-bit input number "a" is multiplied by 9 i.e.,(a*9) which can be re-written as (a\*8) + a . The term (a\*8) is nothing but a left shifting the number a by three bits. Consider that a = a2 a1 a0. (a\*8) results in a2 a1 a0 0 0 0. (a\*9)=(a\*8)+a = a2 a1 a0 a2 a1 a0 = aa(in 6 bit format). Hence in this case no hardware realization is required. The synthesized netlist of this design is shown below:<br/>
 
 ![mult_8_netlist_dia](https://github.com/user-attachments/assets/2142c87c-1d38-4ce8-9ae9-921f5d422a38)
 ![Screenshot from 2024-10-21 15-50-44](https://github.com/user-attachments/assets/1c769ec0-e2b6-48a1-bd97-f3388322b663)
 
 
+### DAY 3 :-  : Combinational and Sequential Optimisations
+
+#### Introduction to optimization
+Optimization plays an important while we design any hardware. It reduces number of components which inturn reduces size and improves performance. Many times, we come across an expression which by simplification reduces to a either simple variable or a constant value through reduction of unsued variables.<br/>
+
+### **Combinational Optimisations**
+The techniques used for optimising the combinational Circuits are as follows:
+1. Constant Propagation (Direct Optimisation)
+2. Boolean Logic Optimisation (using K-Map or Quine McCluskey method)
+
+#### **1. Constant Propagation Illustration**
+Consider the combinational circuit shown below :
+
+![const_propag](./images/week_2_day_3/const_propag.png)
+
+The boolean logic inferred is Y = ((AB)+C)'. If A is always tied to ground i.e., A = 0, then the expression will always evaluate to C'. In this case instead of having a AND gate and a NOR gate the circuit can be simplified by using a single NOT gate with C as its input. Even though both of then represent the same logic since the number of transistors used in the optimised design is less compared to that of the given circuit which shown in the above figure. The transistor level implementation of the given circuit and the optimised circuit is shown below :
+
+![gc_tran](./images/week_2_day_3/gc_tran.png)
+
+![oc_tran](./images/week_2_day_3/oc_tran.png)
+
+The circuit that is given is implemented in NAND logic in order to prevent the stacking of the pmos. The transistor implementation clearly demonstrates a reduction in the required number of transistors for designing, decreasing from 12 to 2 in the optimised design. This will result in reduced power consumption and occuppies less area.
+
+#### **2. Boolean Logic Optimisation Illustration**
+Consider the verilog statement below : 
+```
+assign y = a?(b?c:(c?a:0)):(!c);
+```
+The ternary operator **(?:)** will realize a mux upon synthesis. The combinational circuit that corresponds to the above statement is shown below:
+
+![bl_gc](./images/week_2_day_3/bl_gc.png)
+
+This circuit can be optimised by writing the equivalent expression (or function) in boolean variables and minimising the function that will result in more optimised design which is shown below:
+
+![bl_opt](./images/week_2_day_3/bl_opt.png)
+
+### **Sequential Optimisations**
+
+The sequential logic optimisations techniques are broadly classified into two categories :
+1. Basic Techniques
+	a. Sequential Constant Propagation
+2. Advanced Techniques
+	a. State Optimisation
+	b. Retiming
+	c. Sequential Logic Cloning (Floor aware Synthesis)
+
+#### **1. Sequential Constant Propagation**
+Consider the sequential circuit shown below :
+
+![so_opt](./images/week_2_day_3/so_opt.png)
+
+The D flip-flop shown in the figure is positive edge triggered with asynchronous reset and the data input D is always tied to the ground (i.e, low state or logic 0). When reset is applied the output of the flop becomes low and if reset it deasserted the output of the flop still remains low. Hence one of the input to the NAND gate is always low resulting in the output Y to be always in high stae (logic 1 or VDD). Hence the optimised version of this circuit is connecting the output port Y directly to VDD i.e., the supply voltage.
+
+___
+***Note***: </br>
+Consider the circuit shown below :
+![set_clar](./images/week_2_day_3/set_clar.png)
+
+This circuit is similar to the one that is discussed above except that it doesn't have asynchronous reset instead it has asynchronous set. When the set input is logic 1 then output of the flop i.e., Q becomes high otherwise Q follows D input which is logic 0. This circuit can't be optimised like the previous circuit discussed in the above section. Consider the waveform between timestamp 1 and timestamp 2, the set pin is deasserted before the rising edge of the clock. The output Q remains high until the next rising edge even though the set input is deasseretd. The output of thr flop Q makes transition only at timestamp2. Therefore set input must be considered as Q'. This circuit can't be optimised.
+___
+
+#### **2. State Optimisation**
+State optimization refers to the process of minimizing the number of unused states in a digital circuit's state machine.
+
+#### **3. Sequential Logic Cloning**
+Sequential logic cloning is used to replicate or clone a portion of a sequential logic circuit while maintaining its functionality and behavior. The goal is to exploit the benefits of parallelism and redundancy while ensuring that the cloned circuit produces identical outputs to the original circuit for the same inputs.
+This technique is commonly employed in various scenarios such as redundancy for fault tolerance, speed improvement, and power optimization. This technique is generally used when a physical aware synthesis is done.
+
+Consider the circuit shown below : 
+
+![clo](./images/week_2_day_3/clo.png)
+
+Consider flop A has large positive slack. The flops B and C are far from flop A. Hence there will be a large routing delay from A to B and A to C. To avoid this flop A and the combinational logic 2 is replicated  or cloned in the paths of B and C as shown in the figure below. Since flop A has large positive slack the delay introduced because of the cloning will be compensated and the further delay in the circuit is mainly depended on flop B and flop C.
+
+![clo_opt](./images/week_2_day_3/clo_opt.png)
+
+#### **4. Retiming**
+Retiming  used to improve the performance interms of better timing characteristics by repositioning the registers (flip-flops) within the circuit without altering its functionality. In a digital circuit, registers (flip-flops) are used to store intermediate results and control the flow of data. The placement of these registers can significantly impact the circuit's overall performance, including its critical path delay, clock frequency, and power consumption. Retiming aims to optimize these factors by moving registers to appropriate locations within the circuit.
+
+Consider the circuit shown below :
+
+![rt](./images/week_2_day_3/rt.png)
+
+Consider the C-Q delay and set up time is 0ns. The combinational circuits have finite amount of the propagation delay. The maximum clock frequency with which the circuit operates depends on the propagation delay of the combinational logic. From flop A to B the propagation delay is 5ns and the maximum frequency with which this portion of circuit can be operated is 200MHz. Fom flop B to C the propagation delay is 2ns and the maximum frequency with which this portion of circuit can be operated is 500MHz. The effective frequency is minimum of the both which is 200MHz.
+
+Suppose some part of the logic from combinational circuit between flop B and C is placed with the combinational circuit between the flop A and flop B in such a way that the propagation delay of the circuit between flop A and flop is reduced while propagation delay between flop B and flop C is increased by a small amount as show below :
+
+![rt_opt](./images/week_2_day_3/rt_opt.png)
+
+The maximum frequency with which the portion of circuit between A and B can be operated is 250MHz and the maximum frequency with which the portion of circuit between B and C can be operated is 333MHz. The effective frequency is minimum of the both which is 250MHz. Thus the effective maximum frequency has increased after performing the retiming.
+
+### **Illustration of Combinational Optimizsation:**
+
+**Steps to generate the netlist for the below designs**
+
+Generating netlist steps :
+```
+yosys
+read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib  
+read_verilog <module_name.v> 
+synth -top <top_module_name>
+# flatten # Use if multiple modules are present
+opt_clean -purge
+abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+show
+write_verilog -noattr <netlist_name.v>
+```
+
+___
+**opt_clean** - remove unused cells and wires. The ***-purge*** switch removes internal nets if they have a public name. This command identifies wires and cells that are unused and removes them.  This command can be used to clean up after the commands that do the actual work.
+___
+
+#### **Example 1**
+The verilog code for the example 1 is given below :
+```
+module opt_check (input a , input b , output y);
+	assign y = a?b:0;
+endmodule
+```
+The above code infers a multiplexer as shown below :
+![opt_1](./images/week_2_day_3/opt_1.png)
+
+Since one of the inputs of the multiplexer is always connected to the ground it will infer an AND gate on optimisation.
+
+![opt_1_opt](./images/week_2_day_3/opt_1_opt.png)
+
+The synthesis result and the netlist are shown below :
+![opt_check_net_dia](https://github.com/user-attachments/assets/54120e64-105c-4191-aa5e-ac914dd0401a)
+![Screenshot from 2024-10-21 16-11-19](https://github.com/user-attachments/assets/b31e8ac6-8b61-4513-ad9f-c3c169200452)
+
+#### **Example 2**
+The verilog code for the example 2 is given below :
+```
+module opt_check2 (input a , input b , output y);
+	assign y = a?1:b;
+endmodule
+```
+The above code infers a multiplexer as shown below :
+
+![opt_2](./images/week_2_day_3/opt_2_opt.png)
+
+Since one of the inputs of the multiplexer is always connected to the logic 1 it will infer an OR gate on optimisation. The OR gate will be NAND implementation since NOR gate has stacked pmos while NAND implementation has stacked nmos.
+
+![opt_2_opt](./images/week_2_day_3/opt_2_opt_des.png)
+
+The synthesis result and the netlist are shown below :
+![opt_check2_net_dia](https://github.com/user-attachments/assets/2d2e5540-55e3-47f8-9125-331523e0f682)
+![Screenshot from 2024-10-21 16-12-52](https://github.com/user-attachments/assets/490e7104-9f1d-4159-ac69-335cde647f31)
+
+#### **Example 3**
+The verilog code for the example 3 is given below :
+```
+module opt_check3 (input a , input b, input c , output y);
+	assign y = a?(c?b:0):0;
+endmodule
+```
+The above code infers two multiplexers as shown below : 
+
+![opt_3](./images/week_2_day_3/opt_3.png)
+
+On optimisation the above design becomes a 3 input AND gate as shown below :
+
+![opt_3_opt](./images/week_2_day_3/opt_3_opt.png)
+
+The synthesis result and the netlist are shown below :
+![opt_check3_net_dia](https://github.com/user-attachments/assets/106a9a48-cf86-4c19-8ad0-704ef8dd6b7f)
+![Screenshot from 2024-10-21 16-14-27](https://github.com/user-attachments/assets/fa91ad2d-db47-432a-9147-aa9acc9b4b3d)
+
+#### **Example 4**
+The verilog code for the example 4 is given below :
+```
+module opt_check3 (input a , input b, input c , output y);
+	assign y = a?(c?b:0):0;
+endmodule
+```
+The above code infers two multiplexers as shown below : 
+
+![opt_4](./images/week_2_day_3/opt_4.png)
+
+On optimisation the above design becomes a 2 input XNOR gate as shown below :
+
+![opt_4_opt](./images/week_2_day_3/opt_4_opt.png)
+
+The synthesis result and the netlist are shown below :
+![opt_check4_net_dia](https://github.com/user-attachments/assets/80165ad5-afb4-4123-abc1-93a598fe3b36)
+![Screenshot from 2024-10-21 16-15-46](https://github.com/user-attachments/assets/e1c8cd28-cb8e-44a5-9fa8-7232aef3bb14)
+
+#### **Example 5**
+The verilog code for the example 5 is given below :
+```
+module sub_module1(input a , input b , output y);
+ assign y = a & b;
+endmodule
+
+
+module sub_module2(input a , input b , output y);
+ assign y = a^b;
+endmodule
+
+
+module multiple_module_opt(input a , input b , input c , input d , output y);
+wire n1,n2,n3;
+
+sub_module1 U1 (.a(a) , .b(1'b1) , .y(n1));
+sub_module2 U2 (.a(n1), .b(1'b0) , .y(n2));
+sub_module2 U3 (.a(b), .b(d) , .y(n3));
+
+assign y = c | (b & n1); 
+
+
+endmodule
+```
+
+The circuit inferred by the code is shown below : 
+
+![opt_5](./images/week_2_day_3/opt_5.png)
+
+On optimisation the above design becomes a AND OR gate as shown below :
+
+![opt_5_opt](./images/week_2_day_3/opt_5_opt.png)
+
+The synthesis result and the netlist are shown below :
+![multiple_modules_net_dia](https://github.com/user-attachments/assets/085b8c57-b266-4a34-8ac7-4e5e19eae2a1)
+![Screenshot from 2024-10-21 16-19-46](https://github.com/user-attachments/assets/986760da-3db4-4caa-8c78-fad3f6d65e07)
+![Screenshot from 2024-10-21 16-20-48](https://github.com/user-attachments/assets/e5be6ca3-9e10-4303-9ec7-20b86e4dc114)
+
+#### **Example 6**
+The verilog code for the example 6 is given below :
+```
+module sub_module(input a , input b , output y);
+ assign y = a & b;
+endmodule
 
 
 
+module multiple_module_opt2(input a , input b , input c , input d , output y);
+wire n1,n2,n3;
+
+sub_module U1 (.a(a) , .b(1'b0) , .y(n1));
+sub_module U2 (.a(b), .b(c) , .y(n2));
+sub_module U3 (.a(n2), .b(d) , .y(n3));
+sub_module U4 (.a(n3), .b(n1) , .y(y));
 
 
+endmodule
+```
 
+The circuit inferred by the code is shown below : 
+
+![opt_6](./images/week_2_day_3/opt_6.png)
+
+On optimisation the above design becomes a direct connection of ground (logic 0) to output as shown below :
+
+![opt_6_opt](./images/week_2_day_3/opt_6_opt.png)
+
+The synthesis result and the netlist are shown below :
+![multiple_modules_opt2_net_dia](https://github.com/user-attachments/assets/06901044-5f40-41f7-951a-276fcfbaccfb)
+![Screenshot from 2024-10-21 16-24-30](https://github.com/user-attachments/assets/f7752f67-e924-40ee-8776-5bc78d114503)
+![Screenshot from 2024-10-21 16-24-50](https://github.com/user-attachments/assets/fb00c368-0505-40c5-9eea-cf7e8af9b2d6)
+
+
+### **Illustration of Sequential Optimizsation:**
+
+**Steps to simulate and generate the netlist for the below designs**
+
+Simulation steps :
+```
+iverilog <rtl_name.v> <tb_name.v>
+./a.out
+gtkwave <dump_file_name.vcd>
+```
+
+Generating netlist steps :
+```
+yosys
+read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib  
+read_verilog <module_name.v> 
+synth -top <top_module_name>
+# flatten # use if the multiple modules are present
+opt_clean -purge
+dfflibmap -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+show
+write_verilog -noattr <netlist_name.v>
+```
+
+#### **Example 1**
+The verilog code for the example 1 is given below :
+```
+module dff_const1(input clk, input reset, output reg q);
+always @(posedge clk, posedge reset)
+begin
+	if(reset)
+		q <= 1'b0;
+	else
+		q <= 1'b1;
+end
+
+endmodule
+```
+The above code infers the circuit as shown below :
+
+![sq_opt_1](./images/week_2_day_3/sq_opt_1.png)
+
+Since this code doesn't need optimisation it will infer a D flip-flop with asynchronous reset as shown above.
+
+The simulation, synthesis result and the netlist are shown below :
+![dff_const1_wav](https://github.com/user-attachments/assets/ca2e38cb-b07f-44ab-a82e-e431646be1f4)
+![dff_const1_net_dia](https://github.com/user-attachments/assets/d82b5b3d-8bb8-4c1b-b3bb-2c0a5ab0e4c0)
+![Screenshot from 2024-10-21 16-29-01](https://github.com/user-attachments/assets/dac9ed4c-587a-4914-9441-3f98cfa70bee)
+All the standard cells by default have negative logic for reset and since in the code reset is mentioned as positive, an inverter is used for the reset signal. 
+
+#### **Example 2**
+The verilog code for the example 2 is given below :
+```
+module dff_const2(input clk, input reset, output reg q);
+always @(posedge clk, posedge reset)
+begin
+	if(reset)
+		q <= 1'b1;
+	else
+		q <= 1'b1;
+end
+endmodule
+```
+The above code infers a D flip-flop with asynchronous set (reset signal is applied to set input) as shown below :
+
+![sq_opt_2](./images/week_2_day_3/sq_opt_2.png)
+
+The optimised design infers a direct connection of VDD (logic 1) to the output q as shown below:
+
+![sq_opt_2_opt](./images/week_2_day_3/sq_opt_2_opt.png)
+
+The simulation, synthesis result and the netlist are shown below :
+![dff_const2_wave](https://github.com/user-attachments/assets/3c2da608-ebad-4fc8-a051-97a5e6edc80f)
+![dff_const2_net_dia](https://github.com/user-attachments/assets/ec2b0b83-f7e7-4791-ae30-6be476b2cd63)
+![Screenshot from 2024-10-21 16-40-58](https://github.com/user-attachments/assets/c21e6879-1a15-41c4-99af-56f8c7366c0a)
+
+#### **Example 3**
+The verilog code for the example 3 is given below :
+```
+module dff_const3(input clk, input reset, output reg q);
+reg q1;
+
+always @(posedge clk, posedge reset)
+begin
+	if(reset)
+	begin
+		q <= 1'b1;
+		q1 <= 1'b0;
+	end
+	else
+	begin
+		q1 <= 1'b1;
+		q <= q1;
+	end
+end
+
+endmodule
+```
+The above code infers a two D flip-flop with asynchronous set and reset (reset signal is applied to set and reset input) as shown below :
+
+![sq_opt_3](./images/week_2_day_3/sq_opt_3.png)
+
+Since this code doesn't need optimisation it will infer two D flip-flop with asynchronous set and reset as shown above.
+
+The simulation, synthesis result and the netlist are shown below :
+![dff_const3_wave](https://github.com/user-attachments/assets/77b3ebe7-44f3-4443-ac2f-31ea176f3407)
+
+At the timestamp 1550 the signal q1 changes from 0 to 1 but the output q transits from 1 to 0 for a clock cycle. It is because there will be a finite clock to q delay so the second flip-flop will sample the logic 0 at that rising edge of the clock. Hence there is a change in the output signal for one clock cycle.
+
+![dff_const3_net_dia](https://github.com/user-attachments/assets/4f2cefe2-d55d-407b-9d5e-872033897950)
+![Screenshot from 2024-10-21 16-43-18](https://github.com/user-attachments/assets/9f695e68-31b1-45f1-bd31-f9b9ea709fb4)
+
+#### **Example 4**
+The verilog code for the example 4 is given below :
+```
+module dff_const4(input clk, input reset, output reg q);
+reg q1;
+
+always @(posedge clk, posedge reset)
+begin
+	if(reset)
+	begin
+		q <= 1'b1;
+		q1 <= 1'b1;
+	end
+	else
+	begin
+		q1 <= 1'b1;
+		q <= q1;
+	end
+end
+
+endmodule
+```
+The above code infers a two D flip-flop with asynchronous set(reset signal is applied to set input ) as shown below :
+
+![sq_opt_4](./images/week_2_day_3/sq_opt_4.png)
+
+The optimised design infers a direct connection of VDD (logic 1) to the output q as shown below:
+![sq_opt_4_opt](./images/week_2_day_3/sq_opt_4_opt.png)
+
+The simulation, synthesis result and the netlist are shown below :
+![dff_const4_wave](https://github.com/user-attachments/assets/92f09aeb-2f23-4695-bf73-dee8b15716c7)
+![dff_const4_net_dia](https://github.com/user-attachments/assets/9091fcf5-c804-4f19-86a5-c4dd5cacb052)
+![Screenshot from 2024-10-21 16-45-18](https://github.com/user-attachments/assets/ad3481bc-9116-408d-9048-a29669e2d4c3)
+
+#### **Example 5**
+The verilog code for the example 5 is given below :
+```
+module dff_const5(input clk, input reset, output reg q);
+reg q1;
+
+always @(posedge clk, posedge reset)
+begin
+	if(reset)
+	begin
+		q <= 1'b0;
+		q1 <= 1'b0;
+	end
+	else
+	begin
+		q1 <= 1'b1;
+		q <= q1;
+	end
+end
+
+endmodule
+```
+
+
+The above code infers a two D flip-flop with asynchronous reset  as shown below :
+
+![sq_opt_5](./images/week_2_day_3/sq_opt_5.png)
+
+Since this code doesn't need optimisation it will infer two D flip-flop with asynchronous reset as shown above.
+
+
+The simulation, synthesis result and the netlist are shown below :
+![dff_const5_wave](https://github.com/user-attachments/assets/f91dfd80-2090-4b30-ba69-6b475ad3fcac)
+![dff_const5_net_dia](https://github.com/user-attachments/assets/a6d9457d-32d3-4266-8119-7325cca17e60)
+![Screenshot from 2024-10-21 16-46-37](https://github.com/user-attachments/assets/946ee08f-5d1d-42e1-a733-3f3a141fa931)
+
+
+### **Optimisation of Unused States**
+
+**Steps to simulate and generate the netlist for the below designs**
+
+Simulation steps :
+```
+iverilog <rtl_name.v> <tb_name.v>
+./a.out
+gtkwave <dump_file_name.vcd>
+```
+
+Generating netlist steps :
+```
+yosys
+read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib  
+read_verilog <module_name.v> 
+synth -top <top_module_name>
+opt_clean -purge
+dfflibmap -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib 
+show
+write_verilog -noattr <netlist_name.v>
+```
+
+
+Consider the verilog code shown below :
+```
+module counter_opt (input clk , input reset , output q);
+reg [2:0] count;
+assign q = count[0];
+
+always @(posedge clk ,posedge reset)
+begin
+	if(reset)
+		count <= 3'b000;
+	else
+		count <= count + 1;
+end
+
+endmodule
+```
+
+This verilog code will infer a 3-bit counter with asynchronous reset.
+The possible states of the counter are as follows :
+| count[2] count[1] count[0]  |COUNT[2] COUNT[1] COUNT[0] |
+|:---:|:---:|
+| 0 0 0 | 0 0 1  |
+| 0 0 1 | 0 1 0 |
+| 0 1 0 | 0 1 1 |
+| 0 1 1 | 1 0 0 |
+| 1 0 0 | 1 0 1 |
+| 1 0 1 | 1 1 0 |
+| 1 1 0 | 1 1 1 |
+| 1 1 1 | 0 0 0 |
+
+where </br>
+count - Previous count</br>
+COUNT - Preset count
+
+Since the output q is always assigned COUNT[0]. The other bits of the count are not used and not required. Instead of infering three flip-flops , on optimising the design it will infer a single D flip-flop and an inverter as shown below :
+
+![us_opt](./images/week_2_day_3/us_opt.png)
+
+The simulation, synthesis result and the netlist are shown below :
+![counter_opt_wave](https://github.com/user-attachments/assets/67792bad-5a01-4182-b084-cb4e78080295)
+![counter_opt_net_dia](https://github.com/user-attachments/assets/bd91a14b-fad0-4610-bd2c-e7528a7c8e89)
+![Screenshot from 2024-10-21 16-50-22](https://github.com/user-attachments/assets/bd6691e7-9553-4e20-918b-78c2bccb2391)
+
+
+Consider another verilog code shown below :
+```
+module counter_opt (input clk , input reset , output q);
+reg [2:0] count;
+assign q = count==3'b100;
+
+always @(posedge clk ,posedge reset)
+begin
+	if(reset)
+		count <= 3'b000;
+	else
+		count <= count + 1;
+end
+
+endmodule
+```
+In this case since q is asserted only when count == 3'b100, all the three flip-flops are used. Hence even after optimisation , the code will infer three flops.
+
+The simulation, synthesis result and the netlist are shown below :
+![Screenshot from 2024-10-21 16-54-45](https://github.com/user-attachments/assets/67818dd8-09c9-4a0b-8611-d4e752d36932)
+![counter_opt2_net_dia](https://github.com/user-attachments/assets/a65813e0-84d9-47dd-921d-765b6be23b0f)
+![Screenshot from 2024-10-21 16-52-16](https://github.com/user-attachments/assets/41da7429-9189-43d1-bae1-8b348e5718bd)
+![Screenshot from 2024-10-21 16-52-42](https://github.com/user-attachments/assets/f2b0f7db-0d3f-47b9-8454-77c9a0a45faf)
 
 
 
