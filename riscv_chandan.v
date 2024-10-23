@@ -41,8 +41,8 @@
       //_@0
          assign CPU_reset_a0 = reset;
          assign CPU_clk_chandan_a0 = clk;
-
-
+      //Fetch
+         // Modified PC
          assign CPU_pc_a0[31:0] = (CPU_reset_a1) ? 32'd0 : 
                      (CPU_valid_taken_br_a3) ? CPU_br_tgt_pc_a3 : 
                      (CPU_valid_load_a3) ? CPU_inc_pc_a3 : 
@@ -55,42 +55,35 @@
       //_@1         
          assign CPU_instr_a1[31:0] = CPU_imem_rd_data_a1[31:0];
          assign CPU_inc_pc_a1[31:0] = CPU_pc_a1 + 32'd4;          
-
-
+      // Decode   
          assign CPU_is_i_instr_a1 = CPU_instr_a1[6:2] == 5'b00000 ||
                        CPU_instr_a1[6:2] == 5'b00001 ||
                        CPU_instr_a1[6:2] == 5'b00100 ||
                        CPU_instr_a1[6:2] == 5'b00110 ||
                        CPU_instr_a1[6:2] == 5'b11001;
-
          assign CPU_is_r_instr_a1 = CPU_instr_a1[6:2] == 5'b01011 ||
                        CPU_instr_a1[6:2] == 5'b10100 ||
                        CPU_instr_a1[6:2] == 5'b01100 ||
-                       CPU_instr_a1[6:2] == 5'b01101;
-
+                       CPU_instr_a1[6:2] == 5'b01101;                       
          assign CPU_is_b_instr_a1 = CPU_instr_a1[6:2] == 5'b11000;
-
          assign CPU_is_u_instr_a1 = CPU_instr_a1[6:2] == 5'b00101 ||
                        CPU_instr_a1[6:2] == 5'b01101;
-
          assign CPU_is_s_instr_a1 = CPU_instr_a1[6:2] == 5'b01000 ||
                        CPU_instr_a1[6:2] == 5'b01001;
-
          assign CPU_is_j_instr_a1 = CPU_instr_a1[6:2] == 5'b11011;
-
+         
          assign CPU_imm_a1[31:0] = CPU_is_i_instr_a1 ? { {21{CPU_instr_a1[31]}} , CPU_instr_a1[30:20] } :
                       CPU_is_s_instr_a1 ? { {21{CPU_instr_a1[31]}} , CPU_instr_a1[30:25] , CPU_instr_a1[11:8] , CPU_instr_a1[7] } :
                       CPU_is_b_instr_a1 ? { {20{CPU_instr_a1[31]}} , CPU_instr_a1[7] , CPU_instr_a1[30:25] , CPU_instr_a1[11:8] , 1'b0} :
                       CPU_is_u_instr_a1 ? { CPU_instr_a1[31:12] , 12'b0} : 
                       CPU_is_j_instr_a1 ? { {12{CPU_instr_a1[31]}} , CPU_instr_a1[19:12] , CPU_instr_a1[20] , CPU_instr_a1[30:21] , 1'b0} : 32'b0;
-         //Extra fields- rs1,rs2,rd,func3,func7
-         assign CPU_rs1_valid_a1 = CPU_is_r_instr_a1 || CPU_is_s_instr_a1 || CPU_is_b_instr_a1 || CPU_is_i_instr_a1;
+         
          assign CPU_rs2_valid_a1 = CPU_is_r_instr_a1 || CPU_is_s_instr_a1 || CPU_is_b_instr_a1;
+         assign CPU_rs1_valid_a1 = CPU_is_r_instr_a1 || CPU_is_s_instr_a1 || CPU_is_b_instr_a1 || CPU_is_i_instr_a1;
          assign CPU_rd_valid_a1 = CPU_is_r_instr_a1 || CPU_is_i_instr_a1 || CPU_is_u_instr_a1 || CPU_is_j_instr_a1;
          assign CPU_funct3_valid_a1 = CPU_is_r_instr_a1 || CPU_is_s_instr_a1 || CPU_is_b_instr_a1 || CPU_is_i_instr_a1;
          assign CPU_funct7_valid_a1 = CPU_is_r_instr_a1;
-         //opcode
-         assign CPU_opcode_a1[6:0] = CPU_instr_a1[6:0];
+         
          //_?$rs2_valid
             assign w_CPU_rs2_a1[4:0] = CPU_instr_a1[24:20];
          //_?$rs1_valid
@@ -102,8 +95,8 @@
          //_?$funct7_valid
             assign CPU_funct7_a1[6:0] = CPU_instr_a1[31:25];
             
+         assign CPU_opcode_a1[6:0] = CPU_instr_a1[6:0];
          
-         //Decoding
          assign CPU_dec_bits_a1[10:0] = {CPU_funct7_a1[5],CPU_funct3_a1,CPU_opcode_a1};
          
          // Branch Instruction
@@ -160,15 +153,16 @@
          assign CPU_rf_rd_en2_a2 = CPU_rs2_valid_a2;
          //_?$rf_rd_en2
             assign CPU_rf_rd_index2_a2[4:0] = CPU_rs2_a2[4:0];
-
-      // Connecting Reg file to alu
-         assign CPU_src1_value_a2[31:0] = ((CPU_rd_a3 == CPU_rs1_a2) && CPU_rf_wr_en_a3) ? CPU_result_a3 : CPU_rf_rd_data1_a2[31:0];
-         assign CPU_src2_value_a2[31:0] = ((CPU_rd_a3 == CPU_rs2_a2) && CPU_rf_wr_en_a3) ? CPU_result_a3 : CPU_rf_rd_data2_a2[31:0];
-       // Branch  PC       
+            
+      // Branch  PC       
          assign CPU_br_tgt_pc_a2[31:0] = CPU_pc_a2 + CPU_imm_a2;
       
       // Jump  PC
          assign CPU_jalr_tgt_pc_a2[31:0] = CPU_src1_value_a2 + CPU_imm_a2;
+         
+      // Input signals to ALU
+         assign CPU_src1_value_a2[31:0] = ((CPU_rd_a3 == CPU_rs1_a2) && CPU_rf_wr_en_a3) ? CPU_result_a3 : CPU_rf_rd_data1_a2[31:0];
+         assign CPU_src2_value_a2[31:0] = ((CPU_rd_a3 == CPU_rs2_a2) && CPU_rf_wr_en_a3) ? CPU_result_a3 : CPU_rf_rd_data2_a2[31:0];
          
       //_@3   
          
@@ -215,7 +209,7 @@
                      CPU_is_bge_a3 ? ((CPU_src1_value_a3 >= CPU_src2_value_a3) ^ (CPU_src1_value_a3[31] != CPU_src2_value_a3[31])) :
                      CPU_is_bltu_a3 ? (CPU_src1_value_a3 < CPU_src2_value_a3) :
                      CPU_is_bgeu_a3 ? (CPU_src1_value_a3 >= CPU_src2_value_a3) : 1'b0;
-      //valid branch signal        
+                     
          assign CPU_valid_taken_br_a3 = CPU_valid_a3 && CPU_taken_br_a3;
          
       // Load
@@ -226,14 +220,12 @@
          assign CPU_valid_jump_a3 = CPU_valid_a3 && CPU_is_jump_a3;
                   
       //_@4
-         //memory
          assign CPU_dmem_rd_en_a4 = CPU_valid_load_a4;
          assign CPU_dmem_wr_en_a4 = CPU_valid_a4 && CPU_is_s_instr_a4;
          assign CPU_dmem_addr_a4[3:0] = CPU_result_a4[5:2];
          assign CPU_dmem_wr_data_a4[31:0] = CPU_src2_value_a4[31:0];
          
       //_@5   
-         //load data stage
          assign CPU_ld_data_a5[31:0] = CPU_dmem_rd_data_a5[31:0];
          
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
@@ -254,7 +246,7 @@
    //  o data memory
    //  o CPU visualization
    //_|cpu
-      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 16   // Instantiated from risc_chandan.tlv, 257 as: m4+imem(@1)
+      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 16   // Instantiated from rvmyth.tlv, 249 as: m4+imem(@1)
          // Instruction Memory containing program defined by m4_asm(...) instantiations.
          //_@1
             /*SV_plus*/
@@ -278,7 +270,7 @@
                assign CPU_imem_rd_data_a1[31:0] = CPU_imem_rd_addr_a1 < 10 ? CPU_Imem_instr_a1[CPU_imem_rd_addr_a1] : 32'b0;
           
       //_\end_source    // Args: (read stage)
-      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 31   // Instantiated from risc_chandan.tlv, 258 as: m4+rf(@2, @3)
+      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 31   // Instantiated from rvmyth.tlv, 250 as: m4+rf(@2, @3)
          // Reg File
          //_@3
             generate for (xreg = 0; xreg <= 31; xreg=xreg+1) begin : L1_CPU_Xreg //_/xreg
@@ -298,7 +290,7 @@
                assign CPU_rf_rd_data2_a2[31:0] = CPU_Xreg_value_a4[CPU_rf_rd_index2_a2];
             `BOGUS_USE(CPU_rf_rd_data1_a2 CPU_rf_rd_data2_a2) 
       //_\end_source  // Args: (read stage, write stage) - if equal, no register bypass is required
-      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 48   // Instantiated from risc_chandan.tlv, 259 as: m4+dmem(@4)
+      //_\source /raw.githubusercontent.com/shivanishah269/riscvcore/master/FPGAImplementation/riscvshelllib.tlv 48   // Instantiated from rvmyth.tlv, 251 as: m4+dmem(@4)
          // Data Memory
          //_@4
             generate for (dmem = 0; dmem <= 15; dmem=dmem+1) begin : L1_CPU_Dmem //_/dmem
@@ -317,7 +309,7 @@
             //`BOGUS_USE($dmem_rd_data)
       //_\end_source    // Args: (read/write stage)
 
-//m4+cpu_viz(@4)//Visualization
+     
 //_\SV
    
    endmodule
