@@ -4876,7 +4876,7 @@ In the above given waveform picture i have specified the things which i specifie
 5. Reset.<br/>
 6. riscv with 10 bits output.<br/>
 
-The below picture specifies the thing that i used the netlist file for simulation because we can see the reg, wire which is not visible in normal rvmyth file.<br/>
+The below picture specifies the thing that i used the netlist file for simulation because we can see standard cells which is not visible in normal rvmyth file while viewing the simulation.<br/>
 
 ![final_waveform_wire_netlist](https://github.com/user-attachments/assets/57f3f3eb-b2ba-4d23-8832-1847bb3b38c7)
 
