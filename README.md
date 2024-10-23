@@ -12,6 +12,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 8.[LAB 8](#lab-8)<br/>
 9.[LAB 9](#lab-9)<br/>
 10.[LAB 10](#lab-10)<br/>
+11.[LAB 11](#lab-11)<br/>
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -4806,9 +4807,77 @@ The simulation, synthesis result , the netlist and the GLS are shown below :<br/
 In this case there is a synthesis and simulation mismatch. While performing synthesis yosys has corrected the latch error.
 
 
+# LAB 11 
+# Synthesizing VSDBABYSOC RISC-V based design which is basically the post synthesizing the riscv core which we did in [LAB 9](#lab-9) my rvmyth file is riscv_chandan.v.<br/>
 
+In this lab task we requires the riscv_core file which we used in the previous lab. The filename i am using is riscv_chandan.v, testbench.v, vsdbabysoc.v - as a top module, clk_gate.v and some of the library files like sky130_fd_sc_hd__tt_025C_1v80.lib, avsddac.lib, avsdpll.lib. <br/>
 
+At first, we have to keep all the files in the one directory for easy access while synthesizing it like keeping all the .vh files also. Then open the terminal at that directory and follow the below steps:-<br/>
+```
+yosys
+read_liberty -lib sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -lib avsddac.lib
+read_liberty -lib avsdpll.lib
+read_verilog vsdbabysoc.v
+read_verilog riscv_chandan.v
+read_verilog clk_gate.v
+synth -top vsdbabysoc
+dfflibmap -liberty sky130_fd_sc_hd__tt_025C_1v80.lib 
+abc -liberty sky130_fd_sc_hd__tt_025C_1v80.lib 
+show vsdbabysoc
+write_verilog -noattr vsdbabysoc.synth.v
+```
 
+The general steps are like:-<br/>
+```
+yosys
+read_liberty -lib <sky_130_datapath.lib>
+read_liberty -lib <avsddac_datapath.lib>
+read_liberty -lib <avsdpll_datapath.lib>
+read_verilog <module_name.v>
+# read_verilog <module_name.v> #use how many modules you should instantiate based on that read it
+synth -top <top_module_name>
+dfflibmap -liberty <sky130_datapath.lib>
+abc -liberty <sky130_datapath.lib>
+show <top_module_name>
+write_verilog -noattr <netlist_name.v>
+```
+
+The synthesized design is show as below:-<br/>
+![synth_dia](https://github.com/user-attachments/assets/0a506f2a-bacb-4377-8184-e12ace06c10d)
+
+![netlist](https://github.com/user-attachments/assets/52b9c4c1-301c-4000-8741-10809b4502b3)
+
+After completing these steps we have the synthesized netlist file which we have to simulate and view the waveform with the help of iverilog and gtkwave tool.<br/>
+
+The following are the steps to be followed for getting the simulation waveform:-<br/>
+
+```
+mkdir -p output/post synth sin && iverilog -o output/post synth_sim/post_synth sim.out -DPOST SYNTH SIM-DFUNCTIONAL -DUNIT DELAY=#1 -I src/module/include -I src/module/ -I src/gls_nodel src/module/testbench.v && cd output/post_synth_sim &&/post_synth_sin.out
+gtkwave post_synth_sim.vcd
+```
+Here, the POST_SYNTH_SIM directive is enabled and given to the testbench which includes all the files and simulates the sythesized netlist to generate the .vcd file. The waveform is shown below(for atleast 20 cycles):<br/>
+
+![terminal](https://github.com/user-attachments/assets/d247226a-77d1-4576-9503-b8db7f962dc5)
+
+The final waveform all these steps looks like this:-<br/><br/>
+![finl_waveform](https://github.com/user-attachments/assets/0930943b-1b8a-4ccd-991a-7ef6e764e690)
+
+Zoomed view<br/>
+![final_waveform_zoom](https://github.com/user-attachments/assets/1537e4ed-62a4-479e-a62c-138c2a124994)
+
+In the above given waveform picture i have specified the things which i specified in the previous lab that are:-<br/>
+1. clock with my name.<br/>
+2. DAC output.<br/>
+3. Waveform in analog view.<br/>
+4. PLL.<br/>
+5. Reset.<br/>
+
+The below picture specifies the thing that i used the netlist file for simulation because we can see the reg, wire which is not visible in normal rvmyth file.<br/>
+
+![final_waveform_wire_netlist](https://github.com/user-attachments/assets/57f3f3eb-b2ba-4d23-8832-1847bb3b38c7)
+
+For easy comparison with the previous lab waveform outputs and the present lab waveform outputs please refer the lab - 9 or go through the below figures:-<br/>
 
 
 
