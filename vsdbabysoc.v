@@ -12,17 +12,17 @@ module vsdbabysoc (
    input  wire VREFH
 );
 
-   wire CLK;
+   wire clk_chandan;
    wire [9:0] RV_TO_DAC;
 
    riscv_chandan core (
       .OUT(RV_TO_DAC),
-      .CLK(CLK),
+      .CLK(clk_chandan),
       .reset(reset)
    );
 
    avsdpll pll (
-      .CLK(CLK),
+      .CLK(clk_chandan),
       .VCO_IN(VCO_IN),
       .ENb_CP(ENb_CP),
       .ENb_VCO(ENb_VCO),
