@@ -4867,11 +4867,12 @@ Zoomed view<br/>
 ![final_waveform_zoom](https://github.com/user-attachments/assets/1537e4ed-62a4-479e-a62c-138c2a124994)
 
 In the above given waveform picture i have specified the things which i specified in the previous lab that are:-<br/>
-1. clock with my name.<br/>
+1. Clock with my name.<br/>
 2. DAC output.<br/>
 3. Waveform in analog view.<br/>
 4. PLL.<br/>
 5. Reset.<br/>
+6. riscv with 10 bits output.<br/>
 
 The below picture specifies the thing that i used the netlist file for simulation because we can see the reg, wire which is not visible in normal rvmyth file.<br/>
 
@@ -4879,6 +4880,11 @@ The below picture specifies the thing that i used the netlist file for simulatio
 
 For easy comparison with the previous lab waveform outputs and the present lab waveform outputs please refer the lab - 9 or go through the below figures:-<br/>
 
+![1](https://github.com/user-attachments/assets/c9536ba0-fda0-4ebc-9c05-8e82d41e904c)
+
+Note:- I have uploaded all the .v files which are mainly required for this lab please refer to it.
+
+And at conclusion i am getting the same output as the previous lab by comparing both.
 
 
 
