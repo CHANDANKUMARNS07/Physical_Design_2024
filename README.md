@@ -4862,7 +4862,7 @@ After completing these steps we have the synthesized netlist file which we have 
 The following are the steps to be followed for getting the simulation waveform:-<br/>
 
 ```
-mkdir -p output/post synth sin && iverilog -o output/post synth_sim/post_synth sim.out -DPOST SYNTH SIM-DFUNCTIONAL -DUNIT DELAY=#1 -I src/module/include -I src/module/ -I src/gls_nodel src/module/testbench.v && cd output/post_synth_sim &&/post_synth_sin.out
+mkdir -p output/post_synth_sim && iverilog -o output/post_synth_sim/post_synth_sim.out -DPOST_SYNTH_SIM -DFUNCTIONAL -DUNIT_DELAY=#1     -I src/module/include -I src/module -I src/gls_model     src/module/testbench.v && cd output/post_synth_sim && ./post_synth_sim.out
 gtkwave post_synth_sim.vcd
 ```
 Here, the POST_SYNTH_SIM directive is enabled and given to the testbench which includes all the files and simulates the sythesized netlist to generate the .vcd file. The waveform is shown below(for atleast 20 cycles):<br/>
