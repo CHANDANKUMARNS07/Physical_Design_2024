@@ -1,4 +1,4 @@
-# Physical_Design_2024
+![image](https://github.com/user-attachments/assets/deba2f22-88ae-4d33-840f-85b69e903c0d)# Physical_Design_2024
 This is Chandan Kumar N S (MS2024007). <br/>
 Course - Physical Design of ASICs ( VLS508) <br/>
 # Outline
@@ -4854,8 +4854,7 @@ The below pictures are the proof that i synthesized using my own machines termin
 
 The synthesized design is show as below:-<br/>
 ![image](https://github.com/user-attachments/assets/17a77b30-c28e-4271-bf67-a165443d333d)
-
-![netlist](https://github.com/user-attachments/assets/52b9c4c1-301c-4000-8741-10809b4502b3)
+![1111](https://github.com/user-attachments/assets/3a8447d2-dd10-4531-aa9a-ea3e5adc827d)
 
 After completing these steps we have the synthesized netlist file which we have to simulate and view the waveform with the help of iverilog and gtkwave tool.<br/>
 
