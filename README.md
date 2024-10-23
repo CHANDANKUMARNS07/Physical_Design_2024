@@ -4874,7 +4874,7 @@ In the above given waveform picture i have specified the things which i specifie
 3. Waveform in analog view.<br/>
 4. PLL.<br/>
 5. Reset.<br/>
-6. riscv with 10 bits output.<br/>
+6. Riscv with 10 bits output.<br/>
 
 The below picture specifies the thing that i used the netlist file for simulation because we can see standard cells which is not visible in normal rvmyth file while viewing the simulation.<br/>
 
