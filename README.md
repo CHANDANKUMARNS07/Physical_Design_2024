@@ -4846,7 +4846,7 @@ write_verilog -noattr <netlist_name.v>
 The above commands are explained in [LAB 10](#lab-10) which are basically required for synthesis of a design if any doubts come with respect to the commands functionality please go through the above lab session.
 
 The synthesized design is show as below:-<br/>
-![synth_dia](https://github.com/user-attachments/assets/0a506f2a-bacb-4377-8184-e12ace06c10d)
+![image](https://github.com/user-attachments/assets/17a77b30-c28e-4271-bf67-a165443d333d)
 
 ![netlist](https://github.com/user-attachments/assets/52b9c4c1-301c-4000-8741-10809b4502b3)
 
