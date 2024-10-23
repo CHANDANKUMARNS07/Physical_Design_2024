@@ -4808,7 +4808,7 @@ In this case there is a synthesis and simulation mismatch. While performing synt
 
 
 # LAB 11 
-# Synthesizing VSDBABYSOC RISC-V based design which is basically the post synthesizing the riscv core which we did in [LAB 9](#lab-9) my rvmyth file is riscv_chandan.v.<br/>
+### Synthesizing VSDBABYSOC RISC-V based design which is basically the post synthesizing the riscv core which we did in [LAB 9](#lab-9). My rvmyth file is riscv_chandan.v.<br/>
 
 In this lab task we requires the riscv_core file which we used in the previous lab. The filename i am using is riscv_chandan.v, testbench.v, vsdbabysoc.v - as a top module, clk_gate.v and some of the library files like sky130_fd_sc_hd__tt_025C_1v80.lib, avsddac.lib, avsdpll.lib. <br/>
 
