@@ -4845,6 +4845,13 @@ write_verilog -noattr <netlist_name.v>
 
 The above commands are explained in [LAB 10](#lab-10) which are basically required for synthesis of a design if any doubts come with respect to the commands functionality please go through the above lab session.
 
+The below pictures are the proof that i synthesized using my own machines terminal and also it contains the mapping of cells and also the statistics of it.<br/>
+![11](https://github.com/user-attachments/assets/e16b1fe3-f4e8-4180-bfa4-a1f921d802a6)
+![13](https://github.com/user-attachments/assets/323021be-e175-4d08-9298-790684ed53a0)
+![14](https://github.com/user-attachments/assets/a9fc15e8-c850-43ee-b74c-9dc39e8b1482)
+![15](https://github.com/user-attachments/assets/09c747ad-b163-457a-ae20-2771d9c982c5)
+![16](https://github.com/user-attachments/assets/f1bb502c-b297-4194-9b78-a34ac7de9563)
+
 The synthesized design is show as below:-<br/>
 ![image](https://github.com/user-attachments/assets/17a77b30-c28e-4271-bf67-a165443d333d)
 
@@ -4863,10 +4870,10 @@ Here, the POST_SYNTH_SIM directive is enabled and given to the testbench which i
 ![terminal](https://github.com/user-attachments/assets/d247226a-77d1-4576-9503-b8db7f962dc5)
 
 The final waveform all these steps looks like this:-<br/><br/>
-![finl_waveform](https://github.com/user-attachments/assets/0930943b-1b8a-4ccd-991a-7ef6e764e690)
+![1](https://github.com/user-attachments/assets/d96f6a73-4729-450b-840c-79567050a578)
 
 Zoomed view<br/>
-![final_waveform_zoom](https://github.com/user-attachments/assets/1537e4ed-62a4-479e-a62c-138c2a124994)
+![2](https://github.com/user-attachments/assets/4b030182-fa6a-4706-827b-8d7ba899d9b8)
 
 In the above given waveform picture i have specified the things which i specified in the previous lab that are:-<br/>
 1. Clock with my name.<br/>
@@ -4878,7 +4885,7 @@ In the above given waveform picture i have specified the things which i specifie
 
 The below picture specifies the thing that i used the netlist file for simulation because we can see standard cells which is not visible in normal rvmyth file while viewing the simulation.<br/>
 
-![final_waveform_wire_netlist](https://github.com/user-attachments/assets/57f3f3eb-b2ba-4d23-8832-1847bb3b38c7)
+![3](https://github.com/user-attachments/assets/b0fbfafc-995b-459a-9574-71f7aa3bb190)
 
 For easy comparison with the previous lab waveform outputs and the present lab waveform outputs please refer the lab - 9 or go through the below figures:-<br/>
 
