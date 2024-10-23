@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/deba2f22-88ae-4d33-840f-85b69e903c0d)# Physical_Design_2024
+# Physical_Design_2024
 This is Chandan Kumar N S (MS2024007). <br/>
 Course - Physical Design of ASICs ( VLS508) <br/>
 # Outline
