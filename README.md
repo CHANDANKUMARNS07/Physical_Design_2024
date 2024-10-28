@@ -2888,8 +2888,8 @@ The code snippet of complete RISC-V implementation.<br/>
    m4_asm(BLT, r13, r12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
    m4_asm(ADD, r10, r14, r0)            // Store final result to register a0 so that it can be read by main program
    
-   m4_asm(SW, r0, r10, 10000)           // Store final result from r10(a0) to memory at address 16 (0x10)
-   m4_asm(LW, r15, r0, 10000)           // Load in register x7 value from memory, address 16 (0x10)
+   m4_asm(SW, r0, r10, 100)           // Store final result from r10(a0) to memory at address 16 (0x10)
+   m4_asm(LW, r15, r0, 100)           // Load in register x7 value from memory, address 16 (0x10)
    
    
    // Optional:
