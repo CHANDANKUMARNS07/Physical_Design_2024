@@ -1,0 +1,7 @@
+set_num_threads 1
+set_early_celllib_fpath my_early.lib
+set_late_celllib_fpath my_late.lib
+set_spef_fpath blank.spef
+set_verilog_fpath my_netlist.v
+set_timing_fpath my_netlist.timing
+init_timer
