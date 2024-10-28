@@ -4936,6 +4936,9 @@ The file which are used in this course are uploaded by me to this github repo yo
 After going through these 2 courses now we are able to understand the sta now we are using the previous lab's vsdbabysoc.synth.v file for sta analysis.<br/>
 
 For making the things much easier we have a sta.conf file where all the commands for sta analysis is put in one file and run that single file.<br/>
+The path we considered for the timing reports is reg2reg path, which will be understood if you see the previous lab synthesized netlist yosys graph. As specified by sir for this lab task we have to use the vsdbabysoc netlist that we created.<br/>
+All the below analysis uses same reg2reg path.<br/>
+
 Below are the steps i considered for the execution of sta:-<br/>
 ```
 cd /home/ms2024007/VSDbabysoc/src/script/
