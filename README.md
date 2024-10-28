@@ -13,6 +13,8 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 9.[LAB 9](#lab-9)<br/>
 10.[LAB 10](#lab-10)<br/>
 11.[LAB 11](#lab-11)<br/>
+12.[LAB 12](#lab-12)<br/>
+
 # LAB 1
   ## TASK 1
   ### Write a C Program and compile it on gcc compiler.
@@ -4894,6 +4896,41 @@ Note:- I have uploaded all the .v files which are mainly required for this lab p
 
 And at conclusion i am getting the same output as the previous lab by comparing both.
 
+# LAB-12
+### Static Timing Analysis for the vsdbabysoc, [which we designed in our previous labs] using OPENSTA tool. <br/>
+
+The tasks for this lab given was to find the timing report for the previously generated synthesis file in lab-11. The given constraints are the setup uncertainty and clock transition must be 5% of the assigned clock, hold uncertainty and data transition must be 8% of the clock assigned. The clock time period assigned for me is "11.7ns".<br/>
+
+And also for understanding the STA part we have to go through the 2 courses and then we can easily analyze the timing report.<br/>
+
+The first course named " VSD static timing analysis I ", the link for this is https://www.udemy.com/course/vlsi-academy-sta-checks/?couponCode=3D425F2B9705E44298A9 .<br/>
+In this course we learn about the :- <br/>
+* Understand various STA checks for timing closure<br/>
+* Able to do a quality analysis for real designs<br/>
+* Know-how on how real STA works in industries, something which you will not find in any books<br/>
+* Step-by-step and structured timing analysis<br/>
+
+In overall conclusion we will learn the below things which is present in the below pictures fully.<br/>
+
+![image](https://github.com/user-attachments/assets/eb68cc3d-64f3-489f-9f49-85f1807df89f)
+![image](https://github.com/user-attachments/assets/c5083e47-7271-4291-9b8c-8afafa8274b0)
+
+
+The second course named " VSD static timing analysis II ", the link for this is https://www.udemy.com/course/vlsi-academy-sta-checks-2/?couponCode=952614A18B598B2B0623. <br/>
+In this course we learn about:- <br/>
+ * We will be able to do a real full chip static timing analysis with $0 spent, as designs and tools used in this course are opensource<br/>
+ * We will be able to appreciate power of opensource EDA tools, like Opentimer used in this course, and help in contributing towards the development<br/>
+ * We can explore commercial tools with knowledge and concepts from this course, quite easily<br/>
+ * Manage a entire chip timing signoff<br/>
+
+ The tool used here for explaining is named as " OPENTIMER ", the link for downloading that file is https://github.com/OpenTimer/OpenTimer.git or else we can download the file from the course itself it will be provided their.<br/>
+
+ Below is the picture of opentimer tool which we work in this course<br/>
+![ot_terminal](https://github.com/user-attachments/assets/e483201f-3c4c-41ba-a480-0610bdab0d48)
+![ot_terminal_1](https://github.com/user-attachments/assets/01b825d2-d1e9-400a-8175-843828e77471)
+
+By using the above tool and some of the files which are also present in this course, we can run and see it how does it works and also can change the clock values.<br/>
+The file which are used in this course are uploaded by me to this github repo you can check for confirmation.<br/>
 
 
 
