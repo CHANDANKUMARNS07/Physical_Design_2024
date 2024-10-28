@@ -4939,7 +4939,7 @@ For making the things much easier we have a sta.conf file where all the commands
 Below are the steps i considered for the execution of sta:-<br/>
 ```
 cd /home/ms2024007/VSDbabysoc/src/script/
-sta sta.conf  # For directky running the sta analysis use this command
+sta sta.conf  # For directly running the sta analysis use this command
 ```
 The sta.conf file consists of:-
 ```
