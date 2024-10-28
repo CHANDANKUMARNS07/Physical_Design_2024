@@ -4903,7 +4903,7 @@ The tasks for this lab given was to find the timing report for the previously ge
 
 And also for understanding the STA part we have to go through the 2 courses and then we can easily analyze the timing report.<br/>
 
-The first course named " VSD static timing analysis I ", the link for this is https://www.udemy.com/course/vlsi-academy-sta-checks/?couponCode=3D425F2B9705E44298A9 .<br/>
+The first course named " VSD static timing analysis I ", the link for this is https://www.udemy.com/share/101Gim3@DoG4fpDTIcqr4KUwcp3fBw_no9bOPanjxvr1vvf9GEQuc_IhNqUF6rdsuWArcAUn1w==/ .<br/>
 In this course we learn about the :- <br/>
 * Understand various STA checks for timing closure<br/>
 * Able to do a quality analysis for real designs<br/>
@@ -4916,7 +4916,7 @@ In overall conclusion we will learn the below things which is present in the bel
 ![image](https://github.com/user-attachments/assets/c5083e47-7271-4291-9b8c-8afafa8274b0)
 
 
-The second course named " VSD static timing analysis II ", the link for this is https://www.udemy.com/course/vlsi-academy-sta-checks-2/?couponCode=952614A18B598B2B0623. <br/>
+The second course named " VSD static timing analysis II ", the link for this is https://www.udemy.com/share/101KH83@9rL-RmRbgIlH4RXY3rGdPHsBneKRZYvILo5FCVFr-6zl4kmDQhg_UyigaVzhUs7_ew==/ . <br/>
 In this course we learn about:- <br/>
  * We will be able to do a real full chip static timing analysis with $0 spent, as designs and tools used in this course are opensource<br/>
  * We will be able to appreciate power of opensource EDA tools, like Opentimer used in this course, and help in contributing towards the development<br/>
