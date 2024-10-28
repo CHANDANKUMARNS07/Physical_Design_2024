@@ -4933,6 +4933,125 @@ By using the above tool and some of the files which are also present in this cou
 The file which are used in this course are uploaded by me to this github repo you can check for confirmation.<br/>
 
 
+After going through these 2 courses now we are able to understand the sta now we are using the previous lab's vsdbabysoc.synth.v file for sta analysis.<br/>
+
+For making the things much easier we have a sta.conf file where all the commands for sta analysis is put in one file and run that single file.<br/>
+Below are the steps i considered for the execution of sta:-<br/>
+```
+cd /home/ms2024007/VSDbabysoc/src/script/
+sta sta.conf  # For directky running the sta analysis use this command
+```
+The sta.conf file consists of:-
+```
+read_liberty -min ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -max ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -min ../lib/avsdpll.lib
+read_liberty -max ../lib/avsdpll.lib
+read_liberty -min ../lib/avsddac.lib
+read_liberty -max ../lib/avsddac.lib
+read_verilog ../module/vsdbabysoc.synth.v
+link_design vsdbabysoc
+read_sdc ../sdc/vsdbabysoc_synthesis.sdc
+report_checks -path_delay max -format full  # for finding the setup analysis "thought in course"
+report_checks -path_delay min -format full  # for finding the hold analysis "thought in course" 
+report_checks -path_delay max -format full > t1_setup2.txt # for saving it as a file
+report_checks -path_delay min -format full > t2_hold2.txt  # for saving it as a file
+```
+In above commands read_sdc is the only new thing others all are explained in the previous labs. This sdc file consists of clock creation, setup timing and hold timing.<br/>
+I have used two sdc file one with only creation of clock no other parameters are specified and other is fully specified one.<br/>
+
+1st sdc file contains<br/>
+```
+set_units -time ns
+create_clock [get_pins {pll/CLK}] -name clk -period 11.7
+```
+For this sdc file i got the below as the output<br/>
+
+Setup analysis<br/>
+![terminal1_1](https://github.com/user-attachments/assets/4023d024-c076-4051-962c-38821040b92b)
+
+Hold analysis<br/>
+![terminal2_2](https://github.com/user-attachments/assets/8aabd2b6-6457-4715-bf42-5100b4dc4af0)
+
+Both are in positive as the slack is met because clock uncertainty is not mentioned so we are getting like these results.<br/>
+
+2nd sdc file contains <br/>
+```
+# Create clock with new period
+create_clock [get_pins pll/CLK] -name clk -period 11.7 -waveform {0 5.85} 
+
+# Set loads
+set_load -pin_load 0.5 [get_ports OUT] 
+set_load -min -pin_load 0.5 [get_ports OUT] 
+
+# Set clock latency
+set_clock_latency 1 [get_clocks clk] 
+set_clock_latency -source 2 [get_clocks clk] 
+
+# Set clock uncertainty
+set_clock_uncertainty 0.585 -setup [get_clocks clk]  ; # 5% of clock period for setup
+set_clock_uncertainty 0.936 -hold [get_clocks clk] ; # 8% of clock period for hold
+
+# Set maximum delay
+set_max_delay 11.7 -from [get_pins dac/OUT] -to [get_ports OUT] 
+
+# Set input delay for VCO_IN
+set_input_delay -clock clk -max 4 [get_ports VCO_IN] 
+set_input_delay -clock clk -min 1 [get_ports VCO_IN] 
+
+# Set input delay for ENb_VCO
+#set_input_delay -clock clk -max 4 [get_ports ENb_VCO] 
+#set_input_delay -clock clk -min 1 [get_ports ENb_VCO] 
+
+# Set input delay for ENb_CP
+set_input_delay -clock clk -max 4 [get_ports ENb_CP] 
+set_input_delay -clock clk -min 1 [get_ports ENb_CP] 
+
+# Set input transition for VCO_IN
+set_input_transition -max 0.585 [get_ports VCO_IN] ; # 5% of clock
+set_input_transition -min 0.234 [get_ports VCO_IN] ; 
+
+# Set input transition for ENb_VCO
+#set_input_transition -max 0.585 [get_ports ENb_VCO] ; # 5% of clock
+#set_input_transition -min 0.234 [get_ports ENb_VCO] ; 
+
+# Set input transition for ENb_CP
+set_input_transition -max 0.585 [get_ports ENb_CP] ; # 5% of clock
+set_input_transition -min 0.234 [get_ports ENb_CP] ;
+
+```
+While using the 2nd sdc file i have change the sta.conf file as:-<br/>
+```
+read_liberty -min ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -max ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -min ../lib/avsdpll.lib
+read_liberty -max ../lib/avsdpll.lib
+read_liberty -min ../lib/avsddac.lib
+read_liberty -max ../lib/avsddac.lib
+read_verilog ../module/vsdbabysoc.synth.v
+link_design vsdbabysoc
+read_sdc ../sdc/vsdbaby_syn1.sdc
+report_checks -path_delay max -format full  # for finding the setup analysis "thought in course"
+report_checks -path_delay min -format full  # for finding the hold analysis "thought in course" 
+report_checks -path_delay max -format full > t1_setup2.txt # for saving it as a file
+report_checks -path_delay min -format full > t2_hold2.txt  # for saving it as a file
+```
+Again for running this use below command:-<br/>
+```
+cd /home/ms2024007/VSDbabysoc/src/script/
+sta sta1.conf  # For directky running the sta analysis use this command
+```
+For 2nd sdc file i got below outputs:-<br/>
+
+Setup analysis<br/>
+![teminal1](https://github.com/user-attachments/assets/c368ad06-d34e-485d-99c0-a80c93ce6c77)
+
+Hold analysis<br/>
+![terminal2](https://github.com/user-attachments/assets/26273c24-dc5f-421d-939e-bbff453e418a)
+
+Here we get negative slack and we have been violated in both setup and hold analysis, that means the design needs to be modified to reduce the path delays or the clock frequency under consideration needs to be increased to match the delays.<br/>
+
+The files are also uploaded with respect to this lab. <br/>
 
 
 
