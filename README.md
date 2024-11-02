@@ -5133,6 +5133,9 @@ report_worst_slack -min -digits {4} >> /home/ms2024007/VSDBabySoC/output/sta_wor
 ```
 
 The sdc file mentioned above is same as the previous lab sdc file.<br/>
+![image](https://github.com/user-attachments/assets/17c81d05-6248-4cc9-bac1-47fe5a783c06)
+
+
 
 ### Table for Worst Negative/Setup Slack (WNS) & Worst Hold Slack (WHS) for different available PVT corners, for our BabySoC Design:<br/>
 
