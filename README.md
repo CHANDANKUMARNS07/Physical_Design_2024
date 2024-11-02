@@ -5086,10 +5086,7 @@ The files are also uploaded with respect to this lab. <br/>
 * Download the Skywater 130nm PDK timing libraries for different PVTs from this given link  https://github.com/Subhasis-Sahu/SFAL-VSD/tree/main/skywater-pdk-libs-sky130_fd_sc_hd/timing<br/>
 * The directory i have placed the lib files are :- home/ms2024007/VSDBabySoC/src/module/timing_libs/<br/>
 ![image](https://github.com/user-attachments/assets/8f4cfb15-18d7-4fb2-972d-9d31aa579fd4)
-
-
-
-The below script reads in all the library files one by one from the specified directory and is used on our VSDBabySoC design. The constraints file from the earlier lab is also read (clock-11.7 ns with 5% of clock period for clock uncertainity and data transition delay for setup and 8% of clock period for clock uncertainity and data transition delay for hold)<br/>
+* Run the below script save in .tcl format. The below script reads in all the library files one by one from the specified directory and is used on our VSDBabySoC design. The constraints file from the earlier lab is also read (clock-11.7 ns with 5% of clock period for clock uncertainity and data transition delay for setup and 8% of clock period for clock uncertainity and data transition delay for hold)<br/>
 
 ```
 set list_of_lib_files(1) "sky130_fd_sc_hd__ff_100C_1v65.lib"
