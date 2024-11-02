@@ -14,6 +14,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 10.[LAB 10](#lab-10)<br/>
 11.[LAB 11](#lab-11)<br/>
 12.[LAB 12](#lab-12)<br/>
+13.[LAB 13](#lab-13)<br/>
 
 # LAB 1
   ## TASK 1
@@ -5055,6 +5056,124 @@ Hold analysis<br/>
 Here we get negative slack and we have been violated in both setup and hold analysis, that means the design needs to be modified to reduce the path delays or the clock frequency under consideration needs to be increased to match the delays.<br/>
 
 The files are also uploaded with respect to this lab. <br/>
+
+
+# LAB 13<br/>
+### In this lab we are doing the STA analysis which we already done in previous lab, but their we used only one library file here according to the instructions given i am taking 16 different library files for the purpose of "PVT corner" analysis in different lib files. And also analyzing the WNS & WHS.<br/>
+
+### What are PVT Corners?<br/>
+* PVT (Process, Voltage, Temperature) are the three key factors that impact the performance and behavior of integrated circuits in VLSI design. Here is a summary of how each of these factors affects circuit design:<br/>
+
+1. Process (P):<br/>
+
+* Process variation refers to deviations in the semiconductor fabrication process, such as variations in impurity concentration, oxide thickness, and transistor dimensions.<br/>
+* These process variations can cause changes in transistor parameters like threshold voltage, mobility, and current drive, which in turn impact the circuit delay and performance.<br/>
+* Circuits designed with a "fast" process will have lower delays, while "slow" process corners will have higher delays.<br/>
+
+2. Voltage (V):<br/>
+
+* The supply voltage of the chip can deviate from the optimal value during operation due to factors like noise, IR drop, and voltage regulator variations.<br/>
+* Higher supply voltage leads to increased current and faster charging/discharging of capacitances, resulting in lower delays. Lower voltage has the opposite effect.<br/>
+
+3. Temperature (T):<br/>
+
+* The operating temperature of the chip can vary widely depending on the environment and power dissipation within the chip.<br/>
+* Higher temperatures generally decrease carrier mobility, leading to increased delays. However, in sub-65nm technologies, a "temperature inversion" effect can occur where delays actually increase at lower temperatures.<br/>
+* Engineers must design integrated circuits to function correctly across all possible PVT corners - the combinations of process, voltage, and temperature extremes.<br/>
+
+### Steps for doing this analysis<br/>
+
+* Download the Skywater 130nm PDK timing libraries for different PVTs from this given link  https://github.com/Subhasis-Sahu/SFAL-VSD/tree/main/skywater-pdk-libs-sky130_fd_sc_hd/timing<br/>
+* The directory i have placed the lib files are :- home/ms2024007/VSDBabySoC/src/module/timing_libs/<br/>
+![image](https://github.com/user-attachments/assets/8f4cfb15-18d7-4fb2-972d-9d31aa579fd4)
+
+
+
+The below script reads in all the library files one by one from the specified directory and is used on our VSDBabySoC design. The constraints file from the earlier lab is also read (clock-11.7 ns with 5% of clock period for clock uncertainity and data transition delay for setup and 8% of clock period for clock uncertainity and data transition delay for hold)<br/>
+
+```
+set list_of_lib_files(1) "sky130_fd_sc_hd__ff_100C_1v65.lib"
+set list_of_lib_files(2) "sky130_fd_sc_hd__ff_100C_1v95.lib"
+set list_of_lib_files(3) "sky130_fd_sc_hd__ff_n40C_1v56.lib"
+set list_of_lib_files(4) "sky130_fd_sc_hd__ff_n40C_1v65.lib"
+set list_of_lib_files(5) "sky130_fd_sc_hd__ff_n40C_1v76.lib"
+set list_of_lib_files(6) "sky130_fd_sc_hd__ff_n40C_1v95.lib"
+set list_of_lib_files(7) "sky130_fd_sc_hd__ss_100C_1v40.lib"
+set list_of_lib_files(8) "sky130_fd_sc_hd__ss_100C_1v60.lib"
+set list_of_lib_files(9) "sky130_fd_sc_hd__ss_n40C_1v28.lib"
+set list_of_lib_files(10) "sky130_fd_sc_hd__ss_n40C_1v35.lib"
+set list_of_lib_files(11) "sky130_fd_sc_hd__ss_n40C_1v40.lib"
+set list_of_lib_files(12) "sky130_fd_sc_hd__ss_n40C_1v44.lib"
+set list_of_lib_files(13) "sky130_fd_sc_hd__ss_n40C_1v60.lib"
+set list_of_lib_files(14) "sky130_fd_sc_hd__ss_n40C_1v76.lib"
+set list_of_lib_files(15) "sky130_fd_sc_hd__tt_025C_1v80.lib"
+set list_of_lib_files(16) "sky130_fd_sc_hd__tt_100C_1v80.lib"
+
+
+for {set i 1} {$i <= [array size list_of_lib_files]} {incr i} {
+read_liberty  /home/ms2024007/VSDBabySoC/src/module/timing_libs/$list_of_lib_files($i)
+read_liberty -min ../lib/avsdpll.lib
+read_liberty -max ../lib/avsdpll.lib
+read_liberty -min ../lib/avsddac.lib
+read_liberty -max ../lib/avsddac.lib
+read_verilog /home/ms2024007/VSDBabySoC/src/module/vsdbabysoc.synth.v
+link_design vsdbabysoc
+
+read_sdc /home/ms2024007/VSDBabySoC/src/sdc/vsdbaby_syn1.sdc
+
+report_checks -path_delay min_max -fields {nets cap slew input_pins fanout} -digits {4} > /home/ms2024007/VSDBabySoC/output/sta/new_reports/min_max_$list_of_lib_files($i).txt
+
+exec echo "$list_of_lib_files($i)" >> /home/ms2024007/VSDBabySoC/output/sta_worst_max_slack.txt
+report_worst_slack -max -digits {4} >> /home/ms2024007/VSDBabySoC/output/sta_worst_max_slack.txt
+
+exec echo "$list_of_lib_files($i)" >> /home/ms2024007/VSDBabySoC/output/sta_worst_min_slack.txt
+report_worst_slack -min -digits {4} >> /home/ms2024007/VSDBabySoC/output/sta_worst_min_slack.txt
+
+}
+```
+
+The sdc file mentioned above is same as the previous lab sdc file.<br/>
+
+### Table for Worst Negative/Setup Slack (WNS) & Worst Hold Slack (WHS) for different available PVT corners, for our BabySoC Design:<br/>
+
+![table](https://github.com/user-attachments/assets/783021a6-9008-4fe0-a7fe-d79bcc24e557)
+
+```
+Library_files	                        WNS	WHS
+sky130_fd_sc_hd__ff_100C_1v65.lib	2.51	-0.69
+sky130_fd_sc_hd__ff_100C_1v95.lib	4.86	-0.74
+sky130_fd_sc_hd__ff_n40C_1v56.lib	-2.15	-0.64
+sky130_fd_sc_hd__ff_n40C_1v65.lib	0.29	-0.68
+sky130_fd_sc_hd__ff_n40C_1v76.lib	2.29	-0.71
+sky130_fd_sc_hd__ff_n40C_1v95.lib	4.37	-0.75
+sky130_fd_sc_hd__ss_100C_1v40.lib       -22.42	-0.03
+sky130_fd_sc_hd__ss_100C_1v60.lib	-11.06	-0.29
+sky130_fd_sc_hd__ss_n40C_1v28.lib	-114.74	 0.89
+sky130_fd_sc_hd__ss_n40C_1v35.lib	-69.64	 0.41
+sky130_fd_sc_hd__ss_n40C_1v40.lib	-52.15	 0.19
+sky130_fd_sc_hd__ss_n40C_1v44.lib	-43.53	 0.05
+sky130_fd_sc_hd__ss_n40C_1v60.lib	-20.53	 -0.27
+sky130_fd_sc_hd__ss_n40C_1v76.lib	-11.61	 -0.43
+sky130_fd_sc_hd__tt_025C_1v80.lib	-0.48	 -0.63
+sky130_fd_sc_hd__tt_100C_1v80.lib	 0.35	 -0.62
+```
+
+
+From the above table by plotting the graph we get:- <br/>
+
+1. WNS<br/>
+![setup1](https://github.com/user-attachments/assets/e99d91b9-2d10-49ba-b139-8a059b6fac23)
+
+2. WHS<br/>
+![hold_1](https://github.com/user-attachments/assets/b8341f6e-9a26-4f3a-9a7a-03356e786732)
+
+
+From the graphs we can infer:<br/>
+
+Worst setup slack - sky130_fd_sc_hd__ss_n40C_1v28 PVT Corner library file<br/>
+Worst hold slack - sky130_fd_sc_hd__ff_n40C_1v95 PVT Corner library file<br/>
+
+
 
 
 
