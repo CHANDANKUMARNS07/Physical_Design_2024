@@ -5173,7 +5173,7 @@ From the graphs we can infer:<br/>
 Worst setup slack - sky130_fd_sc_hd__ss_n40C_1v28 PVT Corner library file<br/>
 Worst hold slack - sky130_fd_sc_hd__ff_n40C_1v95 PVT Corner library file<br/>
 
-
+The respective files which are used in this lab are uploaded and also the timing reports and also .tcl file are also uploaded.
 
 
 
