@@ -15,6 +15,7 @@ Course - Physical Design of ASICs ( VLS508) <br/>
 11.[LAB 11](#lab-11)<br/>
 12.[LAB 12](#lab-12)<br/>
 13.[LAB 13](#lab-13)<br/>
+14.[LAB 14](#lab-14)<br/>
 
 # LAB 1
   ## TASK 1
@@ -5176,7 +5177,1685 @@ Worst hold slack - sky130_fd_sc_hd__ff_n40C_1v95 PVT Corner library file<br/>
 
 The respective files which are used in this lab are uploaded and also the timing reports and also .tcl file are also uploaded.
 
+# LAB 14 <br/>
+## Advanced Physical Design using OpenLANE/Sky130 Workshop<br/>
+In this lab we are going through the workshop and implementing using openLANE tool.<br/>
 
+## Day 1 - Inception of open-source EDA, OpenLANE and Sky130 PDK 
+
+### Theory
+
+#### Package
+
+* In any embedded board we have seen, the part of the board we consider as the chip is only the ***PACKAGE*** of the chip which is nothing but a protective layer or packet bound over the actual chip and the actual manufatured chip is usually present at the center of a package wherein, the connections from package is fed to the chip by ***WIRE BOUND*** method which is none other than basic wired connection.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/7562205a-7435-46c7-a66e-de1626911f14)
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/7005a9e3-79da-4590-bea0-eb3768127a3d)
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/70b1c678-2a2e-484f-9181-812dbcd5f0a3)
+
+#### Chip
+
+* Now, taking a look inside the chip, all the signals from the external world to the chip and vice versa is passed through ***PADS***. The area bound by the pads is ***CORE*** where all the digital logic of the chip is placed. Both the core and pads make up the ***DIE*** which is the basic manufacturing unit in regards to semiconductor chips.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/d65a0ddf-2f86-4bbc-8d36-b02e09a1483e)
+
+* ***FOUNDRY*** is the place where the semiconductor chips are manufactured and ***FOUNDRY IP's*** are Intellectual Properties based on a specific foundry and these IP's require a specific level of intelligence to be produced whereas, repeatable digital logic blocks are called ***MACROS***.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/ed1cd25e-6270-4b84-8f0d-f0ea7c8a7ef8)
+
+#### ISA (Intruction Set Architecture)
+
+* A C program which has to be run on a specific hardware layout which is the interior of a chip in your laptop, there is certain flow to be followed.
+* Initially, this particular C program is compiled in it's assembly language program which is nothing but ***RISC-V ISA (Reduced Instruction Set Compting - V Intruction Set Architecture)***.
+* Following this, the assembly language program is then converted to machine language program which is the binary language logic 0 and 1 which is understood by the hardware of the computer.
+* Directly after this, we've to implement this RISC-V specification using some ***RTL (a Hardware Description Language)***. Finally, from the RTL to ***Layout*** it is a standard PnR or RTL to GDSII flow.
+
+![Screenshot (278)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/7dc4601a-e386-48e5-9d1f-7fa5b47ca0ba)
+
+* For an application software to be run on a hardware there are several processes taking place. To begin with, the apps enters into a block called system software and it converts the application program to binary language. There are various layers in system software in which the major layers or components are OS (Operating System), Compiler and Assembler.
+* At first the OS outputs are small function in C, C++, VB or Java language which are taken by the respective compiler and converted into instructions and the syntax of these instructions varies with the hardware architecture on which the system is implemented.
+* Then, the job of the assembler is to take these instructions and convert it into it's binary format which is basically called as a machine language program. Finally, this binary language is fed to the hardware and it understands the specific functions it has to perform based on the binary code it receives.
+
+![Screenshot (279)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/19e8b634-f209-41a6-928d-6fba66f5b177)
+
+* For example, if we take a stopwatch app on RISC-V core, then the output of the OS could be a small C function which enters into the compiler and we get output RISC-V instructions following this, the output of the assembler will be the binary code which enters into your chip layout.
+
+![Screenshot (280)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/7d4570ca-82a6-4abe-81d2-067ebb9b2c15)
+
+* For the above stopwatch the following are the input and output of the compiler and assembler.
+
+![Screenshot (281)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/d7b7fd1b-21ee-46b7-9a91-8314bd753a51)
+
+* The output of the compiler are instructions and the output of the assembler is the binary pattern. Now, we need some RTL (a Hardware Description Language) which understands and implements the particular instructions. Then, this RTL is synthesised into a netlist in form of gates which is fabricated into the chip through a physical design implementation.
+
+![Screenshot (282)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/e349cb06-45e3-4ae4-b85f-9020a0a62737)
+
+* There are mainly 3 different parts in this course. They are:
+1. RISC-V ISA
+2. RTL and synthesis of RISC-V based CPU core - picorv32
+3. Physical design implementation of picorv32
+
+![Screenshot (283)](https://github.com/fayizferosh/risc-v-myth-report/assets/63997454/832f0ea6-2d60-4d9a-937c-a2dedd5f8cac)
+
+#### Open-source Implementation
+
+* For open-source ASIC design implemantation, we require the following enablers to be readily available as open-source versions. They are:-
+1. RTL Designs
+2. EDA Tools
+3. PDK Data
+
+* Initially in the early ages, the design and fabrication of IC's were tightly coupled and were only practiced by very few companies like TI, Intel, etc.
+* In 1979, Lynn Conway and Carver Mead came up with an idea to saperate the design from the fabrication and to do this they inroduced structured design methodologies based on the λ-based design rules and published the first VLSI book "Introduction to VLSI System" which started the VLSI education.
+* This methodology resulted in the emergence of the design only companies or ***"Fabless Companies"*** and fabrication only companies that we usually refer to as ***"Pure Play Fabs"***.
+* The inteface between the designers and the fab by now became a set of data files and documents, that are reffered to as the ***"Process Design Kits (PDKs)"***.
+* The PDK include but not limited to Device Models, Technology Information, Design Rules, Digital Standard Cell Libraries, I/O Libraries and many more.
+* Since, the PDK contained variety of informations, and so they were distributed only under NDAs (Non-Disclosure Agreements) which made it in-accessible to the public.
+* Recently, Google worked out an agreement with skywater to open-source the PDK for the 130nm process by skywater Technology, as a result on 30 June 2020 Google released the first ever open-source PDK.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/87384374-e66b-4ec6-b9c4-3fb92ad4d275)
+
+* ASIC design is a complex step that involves tons of steps, various methodologies and respective EDA tools which are all required for successful ASIC implementation which is achieved though an ASIC flow which is nothing but a piece of software that pulls different tools togather to carry out the design process.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/1762d6d6-c5f8-4bd9-8a3d-968eb4360889)
+
+#### OpenLANE Open-source ASIC Design Implementation Flow
+
+* The main objective of the ASIC Design Flow is to take the design from the RTL (Register Transfer Level) all the way to the GDSII, which is the format used for the final fabrication layout.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/533f58ee-4524-4a18-abb5-36b4d6a56b1f)
+
+* Synthesis is the process of convertion or translation of design RTL into circuits made out of Standard Cell Libraries (SCL) the resultant circuit is described in HDL and is usually reffered to as the Gate-Level Netlist.
+* Gate-Level Netlist is functionally equivalent to the RTL.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/e43891a0-ab09-4df2-898d-7e843158e936)
+
+* The fundemental building blocks which are the standard cells have regular layouts.
+* Each cell has different views/models which are utilised by different EDA tools like liberty view with electrical models of the cells, HDL behavioral models, SPICE or CDL views of the cells, Layout view which include GDSII view which is the detailed view and LEF view which is the abstract view.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/48df884c-c894-4a2a-a511-09321c208d6b)
+
+* Chip Floor Planning
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/38ecd866-ac83-42c7-83ba-2ba995f9ba4e)
+
+* Macro Floor Planning
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/35ac760c-bba9-4bd1-9c65-e8ceeee2ccf5)
+
+* Power Planning typically uses upper metal layers for power distribution since thay are thicker than lower metal layers and so have lower resistance and PP is done to avoid electron migration and IR drops.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/f18013a7-e4c7-4a6d-ba53-33362c04689a)
+
+* Placement
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/3654398b-40bc-4e42-9205-77f673d5584c)
+
+* Global placement provide approximate locations for all cells based on connectivity but in this stage the cells may be overlapped on each other and in detailed placement the positions obtained from global placements are minimally altered to make it legal (non-overlapping and in site-rows)
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/817c504d-0b8e-4a0a-9c3c-e9d110c23535)
+
+* Clock Tree Synthesis
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/6db284d4-065f-450a-9200-a6e6cbfd7fbb)
+
+* Clock skew is the time difference in arrival of clock at different components.
+* Routing
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/7458495f-b527-4f21-813e-8dbcbf29ed9b)
+
+* skywater PDK has 6 routing layers in which the lowest layer is called the local interconnect layer which is a Titanium Nitride layer the following 5 layers are all Aluminium layers.
+
+![stackup](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/e4438c12-d83e-4083-a58f-33a410a47927)
+
+* Global and Detailed Routing
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/b54ebd4c-127a-441f-829e-6000531e9b8d)
+
+* Once done with the routing the final layout can be generated which undergoes various Sign-Off checks.
+* Design Rules Checking (DRC) which verifies that the final layout honours all design fabrication rules.
+* Layout Vs Schematic (LVS) which verifies that the final layout functionality matches the gate-level netlist that we started with.
+* Static Timing Analysis (STA) to verify that the design runs at the designated clock frequency.
+
+![image](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/d8bc72cd-2fe9-4ae2-9431-68a6fa77c671)
+
+
+### Implementation
+
+Section 1 tasks:- 
+1. Run 'picorv32a' design synthesis using OpenLANE flow and generate necessary outputs.
+2. Calculate the flop ratio.
+
+```math
+Flop\ Ratio = \frac{Number\ of\ D\ Flip\ Flops}{Total\ Number\ of\ Cells}
+```
+```math
+Percentage\ of\ DFF's = Flop\ Ratio * 100
+```
+
+#### 1. Run 'picorv32a' design synthesis using OpenLANE flow and generate necessary outputs.
+
+Commands to invoke the OpenLANE flow and perform synthesis
+
+```bash
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+```
+```
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+
+# Exit from OpenLANE flow
+exit
+
+# Exit from OpenLANE flow docker sub-system
+exit
+```
+
+Screenshots of running each commands
+
+![openlane_1_terminal](https://github.com/user-attachments/assets/d9ecba80-6975-44c0-aab5-19d60919e8f0)
+![openlane_2_terminal](https://github.com/user-attachments/assets/5b6109e5-0177-4c40-9700-ee309fcfa4e0)
+![openlane_3_terminal](https://github.com/user-attachments/assets/42a025e7-bf25-4d75-9916-370ce3580642)
+
+#### 2. Calculate the flop ratio.
+
+Screenshots of synthesis statistics report file with required values.<br/>
+
+The below is the commands used for opening the report files.<br/>
+![openlane_4_terminal](https://github.com/user-attachments/assets/4e0dbce5-f5d1-4cae-9a86-fa7c73cde25d)
+
+![openlane_synth_report](https://github.com/user-attachments/assets/d59c1545-855f-421f-a37f-b9d74d3e373f)
+![openlane_synth_report_1](https://github.com/user-attachments/assets/1d24be4c-0f84-4479-b1c6-26e8c47d7bb7)
+
+Proof that i ran the commands and got the synthesis file report in my machine.<br/>
+![proof_report](https://github.com/user-attachments/assets/ae0efaab-f3f0-492d-b7e0-4861775055a2)
+
+
+
+Calculation of Flop Ratio and DFF % from synthesis statistics report file
+
+```math
+Flop\ Ratio = \frac{1613}{14876} = 0.108429685
+```
+```math
+Percentage\ of\ DFF's = 0.108429685 * 100 = 10.84296854\ \%
+```
+
+## Day 2 - Good floorplan vs bad floorplan and introduction to library cells 
+
+### Theory
+
+### Implementation
+
+Section 2 tasks:- 
+1. Run 'picorv32a' design floorplan using OpenLANE flow and generate necessary outputs.
+2. Calculate the die area in microns from the values in floorplan def.
+3. Load generated floorplan def in magic tool and explore the floorplan.
+4. Run 'picorv32a' design congestion aware placement using OpenLANE flow and generate necessary outputs.
+5. Load generated placement def in magic tool and explore the placement.
+
+```math
+Area\ of\ die\ in\ microns = Die\ width\ in\ microns * Die\ height\ in\ microns
+```
+
+#### 1. Run 'picorv32a' design floorplan using OpenLANE flow and generate necessary outputs.
+
+Commands to invoke the OpenLANE flow and perform floorplan
+
+```
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+```
+```
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+
+# Now we can run floorplan
+run_floorplan
+```
+
+Screenshot of floorplan run
+
+![floorplan_terminal](https://github.com/user-attachments/assets/f7f12e49-9240-4db9-9dad-4560c7fc7f2c)
+![floorplan_done](https://github.com/user-attachments/assets/f3a0967b-96a7-4a9f-9a8a-70ec3de2618c)
+
+
+#### 2. Calculate the die area in microns from the values in floorplan def.
+
+Screenshot of contents of floorplan def<br/>
+
+To open the floorplan def file below is the commans.<br/>
+![fllorplane_doc](https://github.com/user-attachments/assets/d289fc4d-5c03-4c2d-9b16-c74635316f35)
+
+![floorplanning_gedit](https://github.com/user-attachments/assets/91f108ca-11f2-466d-ab8b-ce92c1ea8adf)
+
+Proof that i ran and opened in my machine.<br/>
+![floor_plan_proff](https://github.com/user-attachments/assets/881813ce-55f8-43a8-9233-b63ca186fe06)
+
+
+According to floorplan def
+```math
+1000\ Unit\ Distance = 1\ Micron
+```
+```math
+Die\ width\ in\ unit\ distance = 660685 - 0 = 660685
+```
+```math
+Die\ height\ in\ unit\ distance = 671405 - 0 = 671405
+```
+```math
+Distance\ in\ microns = \frac{Value\ in\ Unit\ Distance}{1000}
+```
+```math
+Die\ width\ in\ microns = \frac{660685}{1000} = 660.685\ Microns
+```
+```math
+Die\ height\ in\ microns = \frac{671405}{1000} = 671.405\ Microns
+```
+```math
+Area\ of\ die\ in\ microns = 660.685 * 671.405 = 443587.212425\ Square\ Microns
+```
+
+#### 3. Load generated floorplan def in magic tool and explore the floorplan.
+
+Commands to load floorplan def in magic in another terminal
+
+```bash
+# Change directory to path containing generated floorplan def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/10-11_12-14/results/floorplan/
+
+# Command to load the floorplan def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
+```
+To open the magic tool you can directly go to the directory and open their otherwise you can follow the steps given in the below picture. Both will work correctly.<br/>
+![floorplan_def_magic_terminal](https://github.com/user-attachments/assets/825875ee-aedf-4909-b15a-652265990fab)
+
+Screenshots of floorplan def in magic
+
+![magic_tool](https://github.com/user-attachments/assets/7cc3b62c-b8bb-4725-b2e4-c695ef576f09)
+
+
+Equidistant placement of ports
+
+![equidistant_magic_tool](https://github.com/user-attachments/assets/e5ec09b8-071d-4167-af06-a457524e6671)
+
+
+
+Decap Cells and Tap Cells
+
+![decap_cells_magic](https://github.com/user-attachments/assets/def49853-4fc8-4ea6-ad16-35adec7fa640)
+
+
+Diogonally equidistant Tap cells
+
+![diagnolly_magic](https://github.com/user-attachments/assets/c0942e76-4410-4859-a480-7bae520b65ee)
+
+
+Unplaced standard cells at the origin
+
+![magic_error_cells](https://github.com/user-attachments/assets/0a152aa4-f0e5-4736-a1a5-474bbda65498)
+
+
+#### 4. Run 'picorv32a' design congestion aware placement using OpenLANE flow and generate necessary outputs.
+
+Command to run placement
+
+```
+# Congestion aware placement by default
+run_placement
+```
+
+Screenshots of placement run
+
+![placement_terminal](https://github.com/user-attachments/assets/4f395479-e8a1-474c-be41-914f85c9ebe7)
+
+![placement_1_teminal](https://github.com/user-attachments/assets/2a30df0e-bea3-4ee8-aced-cda9fb81a47e)
+
+
+#### 5. Load generated placement def in magic tool and explore the placement.
+
+Commands to load placement def in magic in another terminal
+
+```bash
+# Change directory to path containing generated placement def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/10-11_12-14/results/placement/
+
+# Command to load the placement def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
+```
+The below shown also works fine.<br/>
+![placement_terminal_magic](https://github.com/user-attachments/assets/e63abba2-7cd1-428b-a4b4-89f0bc4bc152)
+
+Screenshots of floorplan def in magic
+
+![placement_magic](https://github.com/user-attachments/assets/09a1248d-a4c3-4f03-9885-d35521ff1454)
+
+
+Standard cells legally placed 
+
+![std_cells_legally_placement_magic](https://github.com/user-attachments/assets/1f5da9e0-fa0c-48af-a8d4-560adb76ddd0)
+
+
+Commands to exit from current run
+
+```
+# Exit from OpenLANE flow
+exit
+
+# Exit from OpenLANE flow docker sub-system
+exit
+```
+
+## Day 3 - Design library cell using Magic Layout and ngspice characterization 
+
+### Theory
+
+### Implementation
+
+* Section 3 tasks:-
+1. Clone custom inverter standard cell design from github repository: [Standard cell design and characterization using OpenLANE flow](https://github.com/nickson-jose/vsdstdcelldesign).
+2. Load the custom inverter layout in magic and explore.
+3. Spice extraction of inverter in magic.
+4. Editing the spice model file for analysis through simulation.
+5. Post-layout ngspice simulations.
+6. Find problem in the DRC section of the old magic tech file for the skywater process and fix them.
+
+#### 1. Clone custom inverter standard cell design from github repository
+
+```bash
+# Change directory to openlane
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# Clone the repository with custom inverter design
+git clone https://github.com/nickson-jose/vsdstdcelldesign
+
+# Change into repository directory
+cd vsdstdcelldesign
+
+# Copy magic tech file to the repo directory for easy access
+cp /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech .
+
+# Check contents whether everything is present
+ls
+
+# Command to open custom inverter layout in magic
+magic -T sky130A.tech sky130_inv.mag &
+```
+
+Screenshot of commands run
+
+![gitlink_repo_magic_layout](https://github.com/user-attachments/assets/f7c15219-c8d7-4835-bba0-9fd9c33a6ccd)
+
+
+#### 2. Load the custom inverter layout in magic and explore.
+
+Screenshot of custom inverter layout in magic
+
+![layout_magic_git](https://github.com/user-attachments/assets/82d962f6-026e-4238-b433-b681464d2b64)
+
+#### 3. Spice extraction of inverter in magic.
+
+Commands for spice extraction of the custom inverter layout to be used in tkcon window of magic
+
+```
+# Check current directory
+pwd
+
+# Extraction command to extract to .ext format
+extract all
+
+# Before converting ext to spice this command enable the parasitic extraction also
+ext2spice cthresh 0 rthresh 0
+
+# Converting to ext to spice
+ext2spice
+```
+
+Screenshot of tkcon window after running above commands
+
+![tckon_terminal](https://github.com/user-attachments/assets/5cbd8936-190b-4437-81d4-d2c9ccc09e51)
+
+
+Screenshot of created spice file
+
+![spice_file](https://github.com/user-attachments/assets/06a4f3a6-2586-4e86-92a6-d3024b189f7d)
+
+
+#### 4. Editing the spice model file for analysis through simulation.
+
+Measuring unit distance in layout grid
+
+![edit_layout_inv](https://github.com/user-attachments/assets/d8d1da74-9f75-472d-b1fa-1d1d3737c8ce)
+
+
+Final edited spice file ready for ngspice simulation
+
+![inv_edited_script](https://github.com/user-attachments/assets/01c12f15-3954-436f-a929-b25cb7a9538f)
+
+
+#### 5. Post-layout ngspice simulations.
+
+Commands for ngspice simulation
+
+```bash
+# Command to directly load spice file for simulation to ngspice
+ngspice sky130_inv.spice
+
+# Now that we have entered ngspice with the simulation spice file loaded we just have to load the plot
+plot y vs time a
+```
+
+Screenshots of ngspice run
+
+![inv_spice_dia_terminal](https://github.com/user-attachments/assets/b78ea3d3-6dfa-4206-a630-29835fd2fbef)
+
+
+Screenshot of generated plot
+
+![waveform_ngspice](https://github.com/user-attachments/assets/7709005d-e5b2-4c4a-b92c-a81a253173ad)
+
+
+Rise transition time calculation
+
+```math
+Rise\ transition\ time = Time\ taken\ for\ output\ to\ rise\ to\ 80\% - Time\ taken\ for\ output\ to\ rise\ to\ 20\%
+```
+```math
+20\%\ of\ output = 660\ mV
+```
+```math
+80\%\ of\ output = 2.64\ V
+```
+
+80% Screenshot and 20% Screenshot
+
+![rise_terminal_1](https://github.com/user-attachments/assets/23ace2e8-fdf2-46b5-b9b1-416b6d811cfa)
+
+```math
+Rise\ transition\ time = 2.24638 - 2.18242 = 0.06396\ ns = 63.96\ ps
+```
+
+Fall transition time calculation
+
+```math
+Fall\ transition\ time = Time\ taken\ for\ output\ to\ fall\ to\ 20\% - Time\ taken\ for\ output\ to\ fall\ to\ 80\%
+```
+```math
+20\%\ of\ output = 660\ mV
+```
+```math
+80\%\ of\ output = 2.64\ V
+```
+
+80% Screenshot and 20% Screenshot
+
+![fall_terminal](https://github.com/user-attachments/assets/2e43d567-ec03-414c-b5ca-8a53c4f7f68a)
+
+
+```math
+Fall\ transition\ time = 4.0955 - 4.0536 = 0.0419\ ns = 41.9\ ps
+```
+
+Rise Cell Delay Calculation
+
+```math
+Rise\ Cell\ Delay = Time\ taken\ for\ output\ to\ rise\ to\ 50\% - Time\ taken\ for\ input\ to\ fall\ to\ 50\%
+```
+```math
+50\%\ of\ 3.3\ V = 1.65\ V
+```
+
+50% Screenshots
+
+![rise_cell_delay_terminal](https://github.com/user-attachments/assets/0453182e-207c-43a9-9415-1dff32160d5b)
+
+
+```math
+Rise\ Cell\ Delay = 2.20926 - 2.15116 = 0.06136\ ns = 58.1\ ps
+```
+
+Fall Cell Delay Calculation
+
+```math
+Fall\ Cell\ Delay = Time\ taken\ for\ output\ to\ fall\ to\ 50\% - Time\ taken\ for\ input\ to\ rise\ to\ 50\%
+```
+```math
+50\%\ of\ 3.3\ V = 1.65\ V
+```
+
+50% Screenshots
+
+![fall_cell_delay_terminal](https://github.com/user-attachments/assets/a4d7e9b8-3156-4700-94ea-4f9e50cf1202)
+
+
+```math
+Fall\ Cell\ Delay = 4.07 - 4.05 = 0.02\ ns = 20\ ps
+```
+
+#### 6. Find problem in the DRC section of the old magic tech file for the skywater process and fix them.
+
+Link to Sky130 Periphery rules: [https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html](https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html)
+
+Commands to download and view the corrupted skywater process magic tech file and associated files to perform drc corrections
+
+```bash
+# Change to home directory
+cd
+
+# Command to download the lab files
+wget http://opencircuitdesign.com/open_pdks/archive/drc_tests.tgz
+
+# Since lab file is compressed command to extract it
+tar xfz drc_tests.tgz
+
+# Change directory into the lab folder
+cd drc_tests
+
+# List all files and directories present in the current directory
+ls -al
+
+# Command to view .magicrc file
+gvim .magicrc
+
+# Command to open magic tool in better graphics
+magic -d XR &
+```
+
+Screenshots of commands run
+
+![terminal_drc_error](https://github.com/user-attachments/assets/a36dd3d4-d0ed-450d-a966-0fad3e018a0d)
+
+
+Screenshot of .magicrc file
+
+![magic_crc_file](https://github.com/user-attachments/assets/841d25eb-fb3f-4edc-bedd-01d1dedca4c1)
+
+
+**Incorrectly implemented poly.9 simple rule correction**
+
+Screenshot of poly rules
+
+![Screenshot from 2024-03-21 22-54-49](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/9260cf37-5933-44a1-8362-597183644334)
+
+Incorrectly implemented poly.9 rule no drc violation even though spacing < 0.48u
+
+![error_in_layout](https://github.com/user-attachments/assets/571f9f4d-86e6-475a-80cd-4dd1ac2b33ce)
+
+![loaded full view](https://github.com/user-attachments/assets/e7cb3032-9560-4aaf-b17d-fedb7b8633fb)
+
+
+New commands inserted in sky130A.tech file to update drc
+
+![error correction in file 2](https://github.com/user-attachments/assets/94dec824-40ce-4c76-9f19-d81a2d2f0488)
+
+![error correction in file 1](https://github.com/user-attachments/assets/8c9f1ddf-836b-450b-b0b5-9e9507e0628d)
+
+
+Commands to run in tkcon window
+
+```tcl
+# Loading updated tech file
+tech load sky130A.tech
+
+# Must re-run drc check to see updated drc errors
+drc check
+
+# Selecting region displaying the new errors and getting the error messages 
+drc why
+```
+
+Screenshot of magic window with rule implemented
+
+![error_layout_1](https://github.com/user-attachments/assets/faf18eb2-7c43-427c-b95a-4457666be755)
+Error has been fixed.<br/>
+Commands to run in tkcon window this should be done everytime whenever you change the .tech file so that it gets updated.<br/>
+
+```tcl
+# Loading updated tech file
+tech load sky130A.tech
+
+# Must re-run drc check to see updated drc errors
+drc check
+
+# Selecting region displaying the new errors and getting the error messages 
+drc why
+```
+![error_fixed](https://github.com/user-attachments/assets/429ebe8e-c0a4-4cae-bf21-daa0753208a3)
+
+
+
+## Day 4 - Pre-layout timing analysis and importance of good clock tree 
+
+### Theory
+
+### Implementation
+
+#### 1. Fix up small DRC errors and verify the design is ready to be inserted into our flow.
+
+Conditions to be verified before moving forward with custom designed cell layout:
+* Condition 1: The input and output ports of the standard cell should lie on the intersection of the vertical and horizontal tracks.
+* Condition 2: Width of the standard cell should be odd multiples of the horizontal track pitch.
+* Condition 3: Height of the standard cell should be even multiples of the vertical track pitch.
+
+Commands to open the custom inverter layout
+
+```bash
+# Change directory to vsdstdcelldesign
+cd Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign
+
+# Command to open custom inverter layout in magic
+magic -T sky130A.tech sky130_inv.mag &
+```
+
+Screenshot of tracks.info of sky130_fd_sc_hd
+
+![track_info](https://github.com/user-attachments/assets/e717c3be-5a67-4f37-96a2-ae95617bdc81)
+
+
+Commands for tkcon window to set grid as tracks of locali layer
+
+```
+# Get syntax for grid command
+help grid
+
+# Set grid values accordingly
+grid 0.46um 0.34um 0.23um 0.17um
+```
+
+Screenshot of commands run in tkcon <br/>
+
+![cmd_run_verify_day4](https://github.com/user-attachments/assets/550ded51-22de-4076-bd3b-b5ea15bf5a84)
+
+
+Condition 1 verified
+
+![day_4_ionv_layout zoom view](https://github.com/user-attachments/assets/3aae108a-7e5d-4ef4-91ef-e2e90c4d46f0)
+
+
+Condition 2 verified
+
+```math
+Horizontal\ track\ pitch = 0.46\ um
+```
+
+![condition 2](https://github.com/user-attachments/assets/7819bdee-e8cf-4248-9835-a98361dbb1e1)
+
+
+```math
+Width\ of\ standard\ cell = 1.38\ um = 0.46 * 3
+```
+
+Condition 3 verified
+
+```
+Vertical\ track\ pitch = 0.34\ um
+```
+
+![condition 3](https://github.com/user-attachments/assets/a0123136-b724-4a90-b1ec-04e2f5b1e855)
+
+
+```math
+Height\ of\ standard\ cell = 2.72\ um = 0.34 * 8
+```
+
+#### 2. Save the finalized layout with custom name and open it.
+
+Command for tkcon window to save the layout with custom name
+
+```tcl
+# Command to save as
+save sky_130_chandan_inv.mag
+```
+![saving my name](https://github.com/user-attachments/assets/fb7fd76d-41a5-4bed-8fc4-ac370a741d74)
+
+Command to open the newly saved layout
+
+```bash
+# Command to open custom inverter layout in magic
+magic -T sky130A.tech sky_130_chandan_inv.mag &
+```
+
+Screenshot of newly saved layout
+
+![my name layout opened](https://github.com/user-attachments/assets/cac6d827-028e-4f02-a914-985b1781fa41)
+
+
+#### 3. Generate lef from the layout.
+
+Command for tkcon window to write lef
+
+```tcl
+# lef command
+lef write
+```
+
+Screenshot of command run and also the lef file.<br/>
+
+![myname_lef_file](https://github.com/user-attachments/assets/b94ce239-8c5c-4941-9cb7-d96221b02f51)
+
+
+#### 4. Copy the newly generated lef and associated required lib files to 'picorv32a' design 'src' directory.
+
+Commands to copy necessary files to 'picorv32a' design 'src' directory
+
+```bash
+# Copy lef file
+cp sky130_vsdinv.lef ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# List and check whether it's copied
+ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# Copy lib files
+cp libs/sky130_fd_sc_hd__* ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# List and check whether it's copied
+ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+```
+
+Screenshot of commands run
+
+![copy lef file comands terminal](https://github.com/user-attachments/assets/9329fe99-4753-4e48-9457-7bee1d9ad867)
+
+
+#### 5. Edit 'config.tcl' to change lib file and add the new extra lef into the openlane flow.
+
+Commands to be added to config.tcl to include our custom cell in the openlane flow
+
+```tcl
+set ::env(LIB_SYNTH) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib"
+set ::env(LIB_SLOWEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib"
+set ::env(LIB_TYPICAL) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+
+set ::env(EXTRA_LEFS) [glob $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/src/*.lef]
+```
+
+Edited config.tcl to include the added lef and change library to ones we added in src directory
+
+![config file](https://github.com/user-attachments/assets/0b0b3294-df57-4160-9447-379dd13b112a)
+
+
+#### 6. Run openlane flow synthesis with newly inserted custom inverter cell.
+
+Commands to invoke the OpenLANE flow include new lef and perform synthesis 
+
+```bash
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+```
+```tcl
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a
+
+# Adiitional commands to include newly added lef to openlane flow
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+```
+
+Screenshots of commands run
+
+![rerun_term1](https://github.com/user-attachments/assets/62d453cf-6080-40a9-8810-9eecb741f069)
+![rerun_term2](https://github.com/user-attachments/assets/153296d2-e82f-4204-9c4e-41a7b945c958)
+![rerun_term3_synth_done_tns_wns also](https://github.com/user-attachments/assets/7aa0b96f-d0d0-416b-a8a7-ac44be15c066)
+
+#### 7. Remove/reduce the newly introduced violations with the introduction of custom inverter cell by modifying design parameters.
+
+Noting down current design values generated before modifying parameters to improve timing
+
+![rerun_term3_chiparea](https://github.com/user-attachments/assets/722adf66-21eb-4748-8856-93c3da61b095)
+
+![rerun_term3_synth_done_tns_wns also](https://github.com/user-attachments/assets/df5693ea-57df-4a6f-a44a-90d208156060)
+
+
+Commands to view and change parameters to improve timing and run synthesis
+
+```tcl
+# Now once again we have to prep design so as to update variables
+prep -design picorv32a -tag 11-11_16-58 -overwrite
+
+# Addiitional commands to include newly added lef to openlane flow merged.lef
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Command to display current value of variable SYNTH_STRATEGY
+echo $::env(SYNTH_STRATEGY)
+
+# Command to set new value for SYNTH_STRATEGY
+set ::env(SYNTH_STRATEGY) "DELAY 3"
+
+# Command to display current value of variable SYNTH_BUFFERING to check whether it's enabled
+echo $::env(SYNTH_BUFFERING)
+
+# Command to display current value of variable SYNTH_SIZING
+echo $::env(SYNTH_SIZING)
+
+# Command to set new value for SYNTH_SIZING
+set ::env(SYNTH_SIZING) 1
+
+# Command to display current value of variable SYNTH_DRIVING_CELL to check whether it's the proper cell or not
+echo $::env(SYNTH_DRIVING_CELL)
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+```
+
+Screenshot of merged.lef in `tmp` directory with our custom inverter as macro
+
+![image](https://github.com/user-attachments/assets/41d98a9c-3ad8-40f4-baf4-d8de12a27da2)
+
+
+Screenshots of commands run
+
+![rerun_term_1_!](https://github.com/user-attachments/assets/3f4da582-08fb-442a-8e01-ea99e6500170)
+![rerun_term_1_2_synthedone_tns_wns](https://github.com/user-attachments/assets/471ca1cd-9d29-4ba4-a947-08d2eb2f649e)
+
+Comparing to previously noted run values area has increased and worst negative slack has become 0
+
+![rerun_term_3_chiparea](https://github.com/user-attachments/assets/d8c1f0e4-723c-4c65-8aab-71c33eebb628)
+
+![rerun_term_4_run_floorplan](https://github.com/user-attachments/assets/654d9a75-0ca4-4594-87f2-63bdb1e1728e)
+
+
+#### 8. Once synthesis has accepted our custom inverter we can now run floorplan and placement and verify the cell is accepted in PnR flow.
+
+Now that our custom inverter is properly accepted in synthesis we can now run floorplan using following command
+
+```
+# Now we can run floorplan
+run_floorplan
+```
+
+Screenshots of command run
+
+![rerun_term_5_plan_failed](https://github.com/user-attachments/assets/f537cbd9-9a3a-4218-a730-49b85e97ea5b)
+
+
+Since we are facing unexpected un-explainable error while using `run_floorplan` command, we can instead use the following set of commands available based on information from `Desktop/work/tools/openlane_working_dir/openlane/scripts/tcl_commands/floorplan.tcl` and also based on `Floorplan Commands` section in `Desktop/work/tools/openlane_working_dir/openlane/docs/source/OpenLANE_commands.md`
+
+```
+# Follwing commands are alltogather sourced in "run_floorplan" command
+init_floorplan
+place_io
+tap_decap_or
+```
+
+Screenshots of commands run
+
+![rerun_term_6_plan_steps](https://github.com/user-attachments/assets/71199711-7cfc-430a-8049-205adb871297)
+
+![rerun_term_7_floorplan_done](https://github.com/user-attachments/assets/4595fe41-da77-4211-ab51-f758b4abce17)
+
+Now that floorplan is done we can do placement using following command
+
+```
+# Now we are ready to run placement
+run_placement
+```
+
+Screenshots of command run
+
+![rerun_term_8_placement start](https://github.com/user-attachments/assets/e96cefba-ccab-430d-8bdc-e9c238820c5f)
+
+![rerun placement term 9](https://github.com/user-attachments/assets/11d072d6-2668-4c09-bfaa-b4fd9be256b4)
+
+
+Commands to load placement def in magic in another terminal
+
+```bash
+# Change directory to path containing generated placement def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/11-11_16-58/results/placement/
+
+# Command to load the placement def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
+```
+![rerun_magic_term_9](https://github.com/user-attachments/assets/52b1efd2-297b-4cba-913a-51c3fffffc0b)
+
+Screenshot of placement def in magic
+
+![rerun_magic_term_10](https://github.com/user-attachments/assets/be9ab6b2-3ca7-491e-963d-9fcd18726174)
+
+
+Screenshot of custom inverter inserted in placement def with proper abutment
+
+![magic_tool_myname_inv](https://github.com/user-attachments/assets/756f9136-5d88-4d51-8652-5ffbec77b6f7)
+
+
+Command for tkcon window to view internal layers of cells
+
+```tcl
+# Command to view internal connectivity layers
+expand
+```
+
+Abutment of power pins with other cell from library clearly visible
+
+![magic_tool_expand](https://github.com/user-attachments/assets/89870535-7758-4c7c-b0e1-9c7a8856ebaa)
+
+![zoomed view magic tool expand cmd](https://github.com/user-attachments/assets/17293579-bdd0-406f-9ddb-0e69e57b75c6)
+
+
+#### 9. Do Post-Synthesis timing analysis with OpenSTA tool.
+
+Since we are having 0 wns after improved timing run we are going to do timing analysis on initial run of synthesis which has lots of violations and no parameters were added to improve timing
+
+Commands to invoke the OpenLANE flow include new lef and perform synthesis 
+
+```bash
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+```
+```tcl
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a
+
+# Adiitional commands to include newly added lef to openlane flow
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Command to set new value for SYNTH_SIZING
+set ::env(SYNTH_SIZING) 1
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+```
+
+Commands run final screenshot
+![rerun_1_1_1_term_synth start](https://github.com/user-attachments/assets/38ee8acd-3e96-44a2-a836-e2c1be6ab986)
+
+![rerun_1_1_1_term_synth complete](https://github.com/user-attachments/assets/8a7e1d89-73a9-495c-b511-849e10c8af6e)
+
+
+Newly created `pre_sta.conf` for STA analysis in `openlane` directory
+
+![sta conf](https://github.com/user-attachments/assets/1bc35317-8dcb-4d1f-a0da-bf2d07f10370)
+
+
+Newly created `my_base.sdc` for STA analysis in `openlane/designs/picorv32a/src` directory based on the file `openlane/scripts/base.sdc`
+
+![sdc file](https://github.com/user-attachments/assets/20ae90bc-ca17-4254-b3a7-1f93bbc16b61)
+
+![Screenshot from 2024-03-26 05-55-38](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/e07d05db-2f06-47ab-bff7-2af88c39d001)
+
+Commands to run STA in another terminal
+
+```bash
+# Change directory to openlane
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# Command to invoke OpenSTA tool with script
+sta pre_sta.conf
+```
+
+Screenshots of commands run
+
+![delay_term1](https://github.com/user-attachments/assets/29bed19c-ac18-4f9f-be09-3b10f76120a1)
+
+![delat_2_1](https://github.com/user-attachments/assets/d44a6a98-b9a0-409f-8534-399fcb2789be)
+
+![delay_term2](https://github.com/user-attachments/assets/9bdb70d3-9942-4a5b-a5ed-177b146348ba)
+
+Since more fanout is causing more delay we can add parameter to reduce fanout and do synthesis again
+
+Commands to include new lef and perform synthesis 
+
+```tcl
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a -tag 12-11_23-00 -overwrite
+
+# Adiitional commands to include newly added lef to openlane flow
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Command to set new value for SYNTH_SIZING
+set ::env(SYNTH_SIZING) 1
+
+# Command to set new value for SYNTH_MAX_FANOUT
+set ::env(SYNTH_MAX_FANOUT) 4
+
+# Command to display current value of variable SYNTH_DRIVING_CELL to check whether it's the proper cell or not
+echo $::env(SYNTH_DRIVING_CELL)
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+```
+
+Commands run final screenshot
+
+![rerun_term_1](https://github.com/user-attachments/assets/257b3a07-3a3c-467d-af93-5058b2025c27)
+![rerun_term_2](https://github.com/user-attachments/assets/2fcd6e1d-2199-48c9-9faa-4c83465cd826)
+![rerun_synthe_done](https://github.com/user-attachments/assets/75639043-0675-467a-947b-112d2d98f478)
+
+
+
+Commands to run STA in another terminal
+
+```
+# Change directory to openlane
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# Command to invoke OpenSTA tool with script
+sta pre_sta.conf
+```
+
+Screenshots of commands run
+
+![rerun_sta_1](https://github.com/user-attachments/assets/4958c6dc-1a2b-431e-9454-8167349a7b8a)
+
+![rerun_sta_2](https://github.com/user-attachments/assets/2ca5a900-d12c-46d3-b810-99298c56a2f6)
+
+![rerun_sta_3](https://github.com/user-attachments/assets/fa343456-8291-4b06-b566-5cb1956dcfb8)
+
+#### 10. Make timing ECO fixes to remove all violations.
+
+OR gate of drive strength 2 is driving 4 fanouts
+
+![gate or sta ](https://github.com/user-attachments/assets/2734bc41-e12b-4bef-917a-c53a7efeeaf4)
+
+
+Commands to perform analysis and optimize timing by replacing with OR gate of drive strength 4
+
+```tcl
+# Reports all the connections to a net
+report_net -connections _11672_
+
+# Checking command syntax
+help replace_cell
+
+# Replacing cell
+replace_cell _14510_ sky130_fd_sc_hd__or3_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+Result - slack reduced
+
+![drive correct](https://github.com/user-attachments/assets/574dfd78-9853-4850-a96a-9c3e1f195c8c)
+
+![slack down rerm](https://github.com/user-attachments/assets/8e4b2e6b-adfb-4a69-99fa-587c8b5120a7)
+
+
+
+OR gate of drive strength 2 is driving 4 fanouts
+
+![11675 gate term](https://github.com/user-attachments/assets/d2b2ad69-2430-41e8-8dc4-416ab784439e)
+
+
+Commands to perform analysis and optimize timing by replacing with OR gate of drive strength 4
+
+```tcl
+# Reports all the connections to a net
+report_net -connections _11675_
+
+# Replacing cell
+replace_cell _14514_ sky130_fd_sc_hd__or3_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+Result - slack reduced
+
+![11675_1](https://github.com/user-attachments/assets/99401440-3214-41b4-9a32-f03ffa87be6e)
+![slack down term 1](https://github.com/user-attachments/assets/0b2c0720-7faa-4e69-b940-49c012a06b2e)
+
+
+OR gate of drive strength 2 driving OA gate has more delay
+
+![11643](https://github.com/user-attachments/assets/8ffaeb97-bd4f-4470-bb25-26f8026b3cb4)
+
+
+Commands to perform analysis and optimize timing by replacing with OR gate of drive strength 4
+
+```tcl
+# Reports all the connections to a net
+report_net -connections _11643_
+
+# Replacing cell
+replace_cell _14481_ sky130_fd_sc_hd__or4_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+Result - slack reduced
+
+![11643 term 1](https://github.com/user-attachments/assets/f56f9441-5601-4b39-bc9c-c9aa4bdd9fa0)
+
+![slack down 2 term](https://github.com/user-attachments/assets/7eeffdc9-531b-4b4f-91b6-b6e627aabb67)
+
+
+OR gate of drive strength 2 driving OA gate has more delay
+
+![11668](https://github.com/user-attachments/assets/50bf1493-fb89-4de9-81d8-799b56ed0d89)
+
+Commands to perform analysis and optimize timing by replacing with OR gate of drive strength 4
+
+```tcl
+# Reports all the connections to a net
+report_net -connections _11668_
+
+# Replacing cell
+replace_cell _14506_ sky130_fd_sc_hd__or4_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+Result - slack reduced
+
+![11668 term 1](https://github.com/user-attachments/assets/bec5ca96-969a-4c9a-b955-1906f35cdc0d)
+
+![slack down 3 term](https://github.com/user-attachments/assets/d7e5ce0b-391e-447b-931c-d5848e3e0fcb)
+
+
+Commands to verify instance `_14506_`  is replaced with `sky130_fd_sc_hd__or4_4`
+
+```
+# Generating custom timing report
+report_checks -from _30537_ -to _30440_ -through _14481_
+```
+
+Screenshot of replaced instance
+
+![4_4path correct](https://github.com/user-attachments/assets/eb73bf9f-73e7-4543-9a7e-c86e54602f2e)
+
+
+*We started ECO fixes at wns -35.45 and now we stand at wns -34.1833 we reduced around 1.2667 ns of violation*
+
+#### 11. Replace the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and cts.
+
+Now to insert this updated netlist to PnR flow and we can use `write_verilog` and overwrite the synthesis netlist but before that we are going to make a copy of the old old netlist
+
+Commands to make copy of netlist
+
+```bash
+# Change from home directory to synthesis results directory
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/12-11_23-00/results/synthesis/
+
+# List contents of the directory
+ls
+
+# Copy and rename the netlist
+cp picorv32a.synthesis.v picorv32a.synthesis_old.v
+
+# List contents of the directory
+ls
+```
+
+Screenshot of commands run
+
+![cp synth file](https://github.com/user-attachments/assets/b66a3141-9fd2-4e8e-a3d9-80d119ac0181)
+
+
+
+Commands to write verilog
+
+```tcl
+# Check syntax
+help write_verilog
+
+# Overwriting current synthesis netlist
+write_verilog /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/12-11_23-00/results/synthesis/picorv32a.synthesis.v
+
+# Exit from OpenSTA since timing analysis is done
+exit
+```
+
+Screenshot of commands run
+
+![cmd run ss](https://github.com/user-attachments/assets/abfe31f8-8b15-4eca-8143-11911c3d740d)
+
+
+Verified that the netlist is overwritten by checking that instance `_14506_`  is replaced with `sky130_fd_sc_hd__or4_4`
+
+![14506 in synth file](https://github.com/user-attachments/assets/621ade54-e3bd-41ee-8628-d87de64d2537)
+
+
+Since we confirmed that netlist is replaced and will be loaded in PnR but since we want to follow up on the earlier 0 violation design we are continuing with the clean design to further stages
+
+Commands load the design and run necessary stages
+
+```tcl
+# Now once again we have to prep design so as to update variables
+prep -design picorv32a -tag 12-11_23-00 -overwrite
+
+# Addiitional commands to include newly added lef to openlane flow merged.lef
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Command to set new value for SYNTH_STRATEGY
+set ::env(SYNTH_STRATEGY) "DELAY 3"
+
+# Command to set new value for SYNTH_SIZING
+set ::env(SYNTH_SIZING) 1
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+
+# Follwing commands are alltogather sourced in "run_floorplan" command
+init_floorplan
+place_io
+tap_decap_or
+
+# Now we are ready to run placement
+run_placement
+
+# Incase getting error
+unset ::env(LIB_CTS)
+
+# With placement done we are now ready to run CTS
+run_cts
+```
+
+Screenshots of commands run
+
+![again run openlane](https://github.com/user-attachments/assets/569fbaee-0ab6-47f5-882d-3b06a5cea6fd)
+
+![again run _ term 1](https://github.com/user-attachments/assets/9ffeb241-531b-4780-951a-6da650f24294)
+
+![again run _ term synth done](https://github.com/user-attachments/assets/d247a4bb-41b1-48bb-8055-c62addae7909)
+
+![again run _ term 3](https://github.com/user-attachments/assets/94f92129-0a5d-40e8-a102-44bd9d11610a)
+
+![again rerun placement strt](https://github.com/user-attachments/assets/620969e5-5f5e-4408-88f6-432d3c97b0b1)
+
+![again rerun place done](https://github.com/user-attachments/assets/6d26b6d1-8bb3-4318-b6b6-2747f9473fa9)
+
+![run_cts done](https://github.com/user-attachments/assets/4c2ff744-4255-4734-bbda-bedefadf0d2e)
+
+
+#### 12. Post-CTS OpenROAD timing analysis.
+
+Commands to be run in OpenLANE flow to do OpenROAD timing analysis with integrated OpenSTA in OpenROAD
+
+```tcl
+# Command to run OpenROAD tool
+openroad
+
+# Reading lef file
+read_lef /openLANE_flow/designs/picorv32a/runs/24-03_10-03/tmp/merged.lef
+
+# Reading def file
+read_def /openLANE_flow/designs/picorv32a/runs/24-03_10-03/results/cts/picorv32a.cts.def
+
+# Creating an OpenROAD database to work with
+write_db pico_cts.db
+
+# Loading the created database in OpenROAD
+read_db pico_cts.db
+
+# Read netlist post CTS
+read_verilog /openLANE_flow/designs/picorv32a/runs/12-11_23-00/results/synthesis/picorv32a.synthesis_cts.v
+
+# Read library for design
+read_liberty $::env(LIB_SYNTH_COMPLETE)
+
+# Link design and library
+link_design picorv32a
+
+# Read in the custom sdc we created
+read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+
+# Setting all cloks as propagated clocks
+set_propagated_clock [all_clocks]
+
+# Check syntax of 'report_checks' command
+help report_checks
+
+# Generating custom timing report
+report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
+
+# Exit to OpenLANE flow
+exit
+```
+
+Screenshots of commands run and timing report generated
+
+![openroad](https://github.com/user-attachments/assets/128f791e-d191-4482-b1a6-cfffa28309f0)
+
+![slack term 1 openroad](https://github.com/user-attachments/assets/15dd3876-7b8d-4948-8418-8e400dee6e59)
+
+![slack term 2 openroad](https://github.com/user-attachments/assets/bad7c2b3-864e-45a7-8ead-02f7e6a22178)
+
+![slack term 3 openroad](https://github.com/user-attachments/assets/cd51d258-7b16-4b1b-bfe6-c98b334c058c)
+
+
+#### 13. Explore post-CTS OpenROAD timing analysis by removing 'sky130_fd_sc_hd__clkbuf_1' cell from clock buffer list variable 'CTS_CLK_BUFFER_LIST'.
+
+Commands to be run in OpenLANE flow to do OpenROAD timing analysis after changing `CTS_CLK_BUFFER_LIST`
+
+```tcl
+# Checking current value of 'CTS_CLK_BUFFER_LIST'
+echo $::env(CTS_CLK_BUFFER_LIST)
+
+# Removing 'sky130_fd_sc_hd__clkbuf_1' from the list
+set ::env(CTS_CLK_BUFFER_LIST) [lreplace $::env(CTS_CLK_BUFFER_LIST) 0 0]
+
+# Checking current value of 'CTS_CLK_BUFFER_LIST'
+echo $::env(CTS_CLK_BUFFER_LIST)
+
+# Checking current value of 'CURRENT_DEF'
+echo $::env(CURRENT_DEF)
+
+# Setting def as placement def
+set ::env(CURRENT_DEF) /openLANE_flow/designs/picorv32a/runs/12-11_23-00/results/placement/picorv32a.placement.def
+
+# Run CTS again
+run_cts
+
+# Checking current value of 'CTS_CLK_BUFFER_LIST'
+echo $::env(CTS_CLK_BUFFER_LIST)
+
+# Command to run OpenROAD tool
+openroad
+
+# Reading lef file
+read_lef /openLANE_flow/designs/picorv32a/runs/12-11_23-00/tmp/merged.lef
+
+# Reading def file
+read_def /openLANE_flow/designs/picorv32a/runs/12-11_23-00/results/cts/picorv32a.cts.def
+
+# Creating an OpenROAD database to work with
+write_db pico_cts1.db
+
+# Loading the created database in OpenROAD
+read_db pico_cts.db
+
+# Read netlist post CTS
+read_verilog /openLANE_flow/designs/picorv32a/runs/12-11_23-00/results/synthesis/picorv32a.synthesis_cts.v
+
+# Read library for design
+read_liberty $::env(LIB_SYNTH_COMPLETE)
+
+# Link design and library
+link_design picorv32a
+
+# Read in the custom sdc we created
+read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+
+# Setting all cloks as propagated clocks
+set_propagated_clock [all_clocks]
+
+# Generating custom timing report
+report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
+
+# Report hold skew
+report_clock_skew -hold
+
+# Report setup skew
+report_clock_skew -setup
+
+# Exit to OpenLANE flow
+exit
+
+# Checking current value of 'CTS_CLK_BUFFER_LIST'
+echo $::env(CTS_CLK_BUFFER_LIST)
+
+# Inserting 'sky130_fd_sc_hd__clkbuf_1' to first index of list
+set ::env(CTS_CLK_BUFFER_LIST) [linsert $::env(CTS_CLK_BUFFER_LIST) 0 sky130_fd_sc_hd__clkbuf_1]
+
+# Checking current value of 'CTS_CLK_BUFFER_LIST'
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+
+Screenshots of commands run and timing report generated
+
+![openlane term 1](https://github.com/user-attachments/assets/03d49ae5-9f24-40ed-b865-463387a9ae29)
+
+![rerun term 2](https://github.com/user-attachments/assets/6b95ac9f-52c5-4878-891c-43fdb11bceb1)
+
+![rerun term 3](https://github.com/user-attachments/assets/0c62895d-c318-45f5-9550-88dc6badc8a5)
+
+![rerun term 4](https://github.com/user-attachments/assets/6c593e67-b3f1-40ed-81b5-142bf489ab15)
+
+![rerun term 5](https://github.com/user-attachments/assets/2cb0c699-79c9-422a-8ce6-7bb81e2f9b0a)
+
+
+## Day 5 - Final steps for RTL2GDS using tritonRoute and openSTA 
+
+### Theory
+
+### Implementation
+
+#### 1. Perform generation of Power Distribution Network (PDN) and explore the PDN layout.
+
+Commands to perform all necessary stages up until now
+
+```bash
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+```
+```tcl
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+prep -design picorv32a
+
+# Addiitional commands to include newly added lef to openlane flow merged.lef
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+
+# Command to set new value for SYNTH_STRATEGY
+set ::env(SYNTH_STRATEGY) "DELAY 3"
+
+# Command to set new value for SYNTH_SIZING
+set ::env(SYNTH_SIZING) 1
+
+# Now that the design is prepped and ready, we can run synthesis using following command
+run_synthesis
+
+# Following commands are alltogather sourced in "run_floorplan" command
+init_floorplan
+place_io
+tap_decap_or
+
+# Now we are ready to run placement
+run_placement
+
+# Incase getting error
+unset ::env(LIB_CTS)
+
+# With placement done we are now ready to run CTS
+run_cts
+
+# Now that CTS is done we can do power distribution network
+gen_pdn 
+```
+
+Screenshots of power distribution network run
+
+![Screenshot from 2024-03-26 14-22-34](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/dd916806-6688-4c96-b1af-156b2d4acfe6)
+![Screenshot from 2024-03-26 14-22-46](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/1f6ade75-93c2-4b76-bc46-77d1d532a84c)
+
+Commands to load PDN def in magic in another terminal
+
+```bash
+# Change directory to path containing generated PDN def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/floorplan/
+
+# Command to load the PDN def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read 14-pdn.def &
+```
+
+Screenshots of PDN def
+
+![Screenshot from 2024-03-26 14-30-52](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/b13997fd-296c-4213-b4f9-8f66a7375e47)
+![Screenshot from 2024-03-26 14-32-24](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/79b5f158-acf4-4065-a0ec-61007ab465d0)
+![Screenshot from 2024-03-26 14-34-03](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/bee921ce-03d5-49fb-a9fc-bcc6e3402f8c)
+
+#### 2. Perfrom detailed routing using TritonRoute and explore the routed layout.
+
+Command to perform routing
+
+```tcl
+# Check value of 'CURRENT_DEF'
+echo $::env(CURRENT_DEF)
+
+# Check value of 'ROUTING_STRATEGY'
+echo $::env(ROUTING_STRATEGY)
+
+# Command for detailed route using TritonRoute
+run_routing
+```
+
+Screenshots of routing run
+
+![Screenshot from 2024-03-26 14-48-29](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/f166be26-f49a-4001-abee-ce395857990f)
+![Screenshot from 2024-03-26 15-38-39](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/c0c8f372-0293-4fdd-a0a3-691f164e7bed)
+![Screenshot from 2024-03-26 15-29-38](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/70a99289-06ea-4eb8-b3b0-4147395c6f9c)
+
+Commands to load routed def in magic in another terminal
+
+```bash
+# Change directory to path containing routed def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/
+
+# Command to load the routed def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.def &
+```
+
+Screenshots of routed def
+
+![Screenshot from 2024-03-26 15-33-12](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/6eade230-eb96-4d7b-b7a9-7a7db9c2c8b7)
+![Screenshot from 2024-03-26 15-30-36](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/b1900c55-7470-41b2-8b4f-3af871494d99)
+![Screenshot from 2024-03-26 15-31-29](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/5faaca5b-fb6e-4abd-946d-6531b35489b8)
+![Screenshot from 2024-03-26 15-32-20](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/594ef79b-4755-4934-a087-33fb24996526)
+
+Screenshot of fast route guide present in `openlane/designs/picorv32a/runs/26-03_08-45/tmp/routing` directory
+
+![Screenshot from 2024-03-26 15-41-18](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/1dc38a57-03c9-45c3-acdb-063731a86433)
+
+#### 3. Post-Route parasitic extraction using SPEF extractor.
+
+Commands for SPEF extraction using external tool
+
+```bash
+# Change directory
+cd Desktop/work/tools/SPEF_EXTRACTOR
+
+# Command extract spef
+python3 main.py /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
+```
+
+#### 4. Post-Route OpenSTA timing analysis with the extracted parasitics of the route.
+
+Commands to be run in OpenLANE flow to do OpenROAD timing analysis with integrated OpenSTA in OpenROAD
+
+```tcl
+# Command to run OpenROAD tool
+openroad
+
+# Reading lef file
+read_lef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef
+
+# Reading def file
+read_def /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
+
+# Creating an OpenROAD database to work with
+write_db pico_route.db
+
+# Loading the created database in OpenROAD
+read_db pico_route.db
+
+# Read netlist post CTS
+read_verilog /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/synthesis/picorv32a.synthesis_preroute.v
+
+# Read library for design
+read_liberty $::env(LIB_SYNTH_COMPLETE)
+
+# Link design and library
+link_design picorv32a
+
+# Read in the custom sdc we created
+read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+
+# Setting all cloks as propagated clocks
+set_propagated_clock [all_clocks]
+
+# Read SPEF
+read_spef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.spef
+
+# Generating custom timing report
+report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
+
+# Exit to OpenLANE flow
+exit
+```
+
+Screenshots of commands run and timing report generated
+
+![Screenshot from 2024-03-26 23-16-16](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/72ef3e8d-7ca2-4b60-89ea-de053f9c2902)
+![Screenshot from 2024-03-26 23-17-09](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/5cac9ce5-420a-4eaa-b5f4-09286701e550)
+![Screenshot from 2024-03-26 23-17-32](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/7d809f14-66b6-4dd6-8161-2ad8371cfaf9)
+![Screenshot from 2024-03-26 23-17-56](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/64ccb1d8-74aa-42b0-88d4-a0f9588d2ca2)
+
+# Certificate
+
+![Digital-VLSI-SoC-Design-and-Planning-Certificate](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/6f292f50-f95b-471c-8dac-bf0ea7345c9b)
+
+# Acknowledgements
+
+* [Kunal Ghosh](https://github.com/kunalg123), Co-founder, VSD Corp. Pvt. Ltd.
+* [Nickson P Jose](https://github.com/nickson-jose), Physical Design Engineer, Intel Corporation.
+* [R. Timothy Edwards](https://github.com/RTimothyEdwards), Senior Vice President of Analog and Design, efabless Corporation.
 
 
 
