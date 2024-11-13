@@ -5177,7 +5177,7 @@ Worst hold slack - sky130_fd_sc_hd__ff_n40C_1v95 PVT Corner library file<br/>
 
 The respective files which are used in this lab are uploaded and also the timing reports and also .tcl file are also uploaded.
 
-# LAB 14 <br/>
+# LAB 14 
 ## Advanced Physical Design using OpenLANE/Sky130 Workshop<br/>
 In this lab we are going through the workshop and implementing using openLANE tool.<br/>
 
@@ -5901,14 +5901,14 @@ Condition 1 verified
 Condition 2 verified
 
 ```math
-Horizontal\ track\ pitch = 0.46\ um
+Horizontal track pitch = 0.46um
 ```
 
 ![condition 2](https://github.com/user-attachments/assets/7819bdee-e8cf-4248-9835-a98361dbb1e1)
 
 
 ```math
-Width\ of\ standard\ cell = 1.38\ um = 0.46 * 3
+Width of standard cell = 1.38um = 0.46 * 3
 ```
 
 Condition 3 verified
@@ -5921,7 +5921,7 @@ Vertical\ track\ pitch = 0.34\ um
 
 
 ```math
-Height\ of\ standard\ cell = 2.72\ um = 0.34 * 8
+Height standard cell = 2.72 um = 0.34 * 8
 ```
 
 #### 2. Save the finalized layout with custom name and open it.
@@ -6661,11 +6661,105 @@ Screenshots of commands run and timing report generated
 ![rerun term 5](https://github.com/user-attachments/assets/2cb0c699-79c9-422a-8ce6-7bb81e2f9b0a)
 
 
-## Day 5 - Final steps for RTL2GDS using tritonRoute and openSTA 
+## Day 5 - Final steps for RTL2GDS using tritonRoute and openSTA 	
+#  Maze Routing and Lee's algorithm
 
-### Theory
+ Routing is the process of establishing a physical connection between two pins. Algorithms designed for routing take source and target pins and aim to find the most efficient path between them, ensuring a valid connection exists.
 
-### Implementation
+The Maze Routing algorithm, such as the Lee algorithm, is one approach for solving routing problems. In this method, a grid similar to the one created during cell customization is utilized for routing purposes. The Lee algorithm starts with two designated points, the source and target, and leverages the routing grid to identify the shortest or optimal route between them.
+
+The algorithm assigns labels to neighboring grid cells around the source, incrementing them from 1 until it reaches the target (for instance, from 1 to 7). Various paths may emerge during this process, including L-shaped and zigzag-shaped routes. The Lee algorithm prioritizes selecting the best path, typically favoring L-shaped routes over zigzags. If no L-shaped paths are available, it may resort to zigzag routes. This approach is particularly valuable for global routing tasks.
+
+However, the Lee algorithm has limitations. It essentially constructs a maze and then numbers its cells from the source to the target. While effective for routing between two pins, it can be time-consuming when dealing with millions of pins. There are alternative algorithms that address similar routing challenges.
+
+![image](https://github.com/user-attachments/assets/417076b5-915d-45d3-8935-1ff0e05b2e35)
+
+## Design Rule Check (DRC)
+
+DRC verifies whether a design meets the predefined process technology rules given by the foundry for its manufacturing. DRC checking is an essential part of the physical design flow and ensures the design meets manufacturing requirements and will not result in a chip failure. It defines the Quality of chip. They are so many DRCs, let us see few of them
+
+Design rules for physical wires
+
+Minimum width of the wire, Minimum spacing between the wires, Minimum pitch of the wire To solve signal short violation, we take the metal layer and put it on to upper metal layer. we check via rules, Via width, via spacing.
+
+## Power Distribution Network generation
+
+Unlike the general ASIC flow, Power Distribution Network generation is not a part of floorplan run in OpenLANE. PDN must be generated after CTS and post-CTS STA analyses:
+
+we can check whether PDN has been created or no by check the current def environment variable: ``` echo $::env(CURRENT_DEF)```
+
+```
+prep -design picorv32a -tag Run 12.07.10.11
+gen_pdn
+
+```
+
+
+- Once the command is given, power distribution netwrok is generated.
+- The power distribution network has to take the ```design_cts.def``` as the input def file.
+- Power rings,strapes and rails are created by PDN.
+- From VDD and VSS pads, power is drawn to power rings.
+- Next, the horizontal and vertical strapes connected to rings draw the power from strapes.
+- Stapes are connected to rings and these rings are connected to std cells. So, standard cells get power from rails.
+- The standard cells are designed such that it's height is multiples of the vertical tracks /track pitch.Here, the pitch is 2.72. Only if the above conditions are adhered it is possible to power the standard cells.
+- There are definitions for the straps and the rails. In this design, straps are at metal layer 4 and 5 and the standard cell rails are at the metal layer 1. Vias connect accross the layers as required.
+
+![image](https://github.com/user-attachments/assets/30a07831-821e-490d-9187-32ff901060dc)
+
+## Routing
+
+ In the realm of routing within Electronic Design Automation (EDA) tools, such as both OpenLANE and commercial EDA tools, the routing process is exceptionally intricate due to the vast design space. To simplify this complexity, the routing procedure is typically divided into two distinct stages: Global Routing and Detailed Routing.
+
+The two routing engines responsible for handling these two stages are as follows:
+
+- **Global Routing**: In this stage, the routing region is subdivided into rectangular grid cells and represented as a coarse 3D routing graph. This task is accomplished by the "FASTE ROUTE" engine.
+
+- **Detailed Routing**: Here, finer grid granularity and routing guides are employed to implement the physical wiring. The "tritonRoute" engine comes into play at this stage. "Fast Route" generates initial routing guides, while "Triton Route" utilizes the Global Route information and further refines the routing, employing various strategies and optimizations to determine the most optimal path for connecting the pins.
+
+## Key Features of TritonRoute
+
+- **Initial Detail Routing**: TritonRoute initiates the detailed routing process, providing the foundation for the subsequent routing steps.
+
+- **Adherence to Pre-Processed Route Guides**: TritonRoute places significant emphasis on following pre-processed route guides. This involves several actions:
+
+   - **Initial Route Guide Analysis**: TritonRoute analyzes the directions specified in the preferred route guides. If any non-directional routing guides are identified, it breaks them down into unit widths.
+
+   - **Guide Splitting**: In cases where non-directional routing guides are encountered, TritonRoute divides them into unit widths to facilitate routing.
+
+   - **Guide Merging**: TritonRoute merges guides that are orthogonal (touching guides) to the preferred guides, streamlining the routing process.
+
+   - **Guide Bridging**: When it encounters guides that run parallel to the preferred routing guides, TritonRoute employs an additional layer to bridge them, ensuring efficient routing within the preprocessed guides.
+   - Assumes route guide for each net satisfy inter guide connectivity Same metal layer with touching guides or neighbouring metal layers with nonzero  vertically overlapped area( via are placed ).each unconnected termial i.e., pin of a standard cell instance should have its pin shape overlapped by a routing guide( a black dot(pin) with purple box(metal1 layer)). 
+
+
+In summary, TritonRoute is a sophisticated tool that not only performs initial detail routing but also places a strong emphasis on optimizing routing within pre-processed route guides by breaking down, merging, and bridging them as needed to achieve efficient and effective routing results.
+
+Works on MILP(Mixed Integer linear programming) based panel routing scheme with Intra-layer parallel and Inter-layer sequential routing framework
+
+# TritonRoute problem statement
+
+```
+Inputs : LEF, DEF, Preprocessed route guides
+Output : Detailed routing solution with optimized wire length and via count
+Constraints : Route guide honoring, connectivity constraints and design rules.
+
+```
+The space where the detailed route takes place has been defined. Now TritonRoute handles the connectivity in two ways.
+
+Access Point(AP) : An on-grid point on the metal of the route guide, and is used to connect to lower-layer segments, pins or IO ports,upper-layer segments.
+Access Point Cluster(APC) : A union of all the Aps derived from same lower-layer segment, a pin or an IO port, upper-layer guide.
+
+**TritonRoute run for routing**
+
+Make sure the CURRENT_DEF is set to pdn.def
+
+Start routing by using
+
+```
+run_routing
+```
+The options for routing can be set in the config.tcl file.
+The optimisations in routing can also be done by specifying the routing strategy to use different version of TritonRoute Engine. There is a trade0ff between the optimised route and the runtime for routing.
 
 #### 1. Perform generation of Power Distribution Network (PDN) and explore the PDN layout.
 
@@ -6721,15 +6815,17 @@ gen_pdn
 ```
 
 Screenshots of power distribution network run
+![rerun again term 1](https://github.com/user-attachments/assets/224a92fb-d8ad-494a-895c-3e3e79e2eb6c)
+![rerun again term 2](https://github.com/user-attachments/assets/767ebd32-0ca0-434e-b370-dc382ddeb083)
+![rerun again term 3](https://github.com/user-attachments/assets/9d0a46d3-9ac5-4288-a330-2947604d3956)
 
-![Screenshot from 2024-03-26 14-22-34](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/dd916806-6688-4c96-b1af-156b2d4acfe6)
-![Screenshot from 2024-03-26 14-22-46](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/1f6ade75-93c2-4b76-bc46-77d1d532a84c)
+
 
 Commands to load PDN def in magic in another terminal
 
 ```bash
 # Change directory to path containing generated PDN def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/floorplan/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/13-11_00-51/tmp/floorplan/
 
 # Command to load the PDN def in magic tool
 magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read 14-pdn.def &
@@ -6737,15 +6833,18 @@ magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs
 
 Screenshots of PDN def
 
-![Screenshot from 2024-03-26 14-30-52](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/b13997fd-296c-4213-b4f9-8f66a7375e47)
-![Screenshot from 2024-03-26 14-32-24](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/79b5f158-acf4-4065-a0ec-61007ab465d0)
-![Screenshot from 2024-03-26 14-34-03](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/bee921ce-03d5-49fb-a9fc-bcc6e3402f8c)
+![magic tool last 1](https://github.com/user-attachments/assets/1a669e43-a429-4966-85a5-906986f238c6)
+
+![magic tool last 2](https://github.com/user-attachments/assets/a09eb31f-c1b9-4a99-99c7-92c6d552432c)
+
+![magic tool last 3](https://github.com/user-attachments/assets/96d8c4d0-bc5b-48be-b683-56cda364914f)
+
 
 #### 2. Perfrom detailed routing using TritonRoute and explore the routed layout.
 
 Command to perform routing
 
-```tcl
+```
 # Check value of 'CURRENT_DEF'
 echo $::env(CURRENT_DEF)
 
@@ -6758,15 +6857,18 @@ run_routing
 
 Screenshots of routing run
 
-![Screenshot from 2024-03-26 14-48-29](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/f166be26-f49a-4001-abee-ce395857990f)
-![Screenshot from 2024-03-26 15-38-39](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/c0c8f372-0293-4fdd-a0a3-691f164e7bed)
-![Screenshot from 2024-03-26 15-29-38](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/70a99289-06ea-4eb8-b3b0-4147395c6f9c)
+![last run routing](https://github.com/user-attachments/assets/8c1d2b90-416f-41df-8580-a3a48fa5ecf1)
+
+![0 vio](https://github.com/user-attachments/assets/53ceef26-028d-4105-9a69-804a88e18172)
+
+![routing done](https://github.com/user-attachments/assets/2862d3b9-3c9a-419c-b1ec-b08b86c2bd1a)
+
 
 Commands to load routed def in magic in another terminal
 
 ```bash
 # Change directory to path containing routed def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/13-11_00-51/results/routing/
 
 # Command to load the routed def in magic tool
 magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.def &
@@ -6774,40 +6876,31 @@ magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs
 
 Screenshots of routed def
 
-![Screenshot from 2024-03-26 15-33-12](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/6eade230-eb96-4d7b-b7a9-7a7db9c2c8b7)
-![Screenshot from 2024-03-26 15-30-36](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/b1900c55-7470-41b2-8b4f-3af871494d99)
-![Screenshot from 2024-03-26 15-31-29](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/5faaca5b-fb6e-4abd-946d-6531b35489b8)
-![Screenshot from 2024-03-26 15-32-20](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/594ef79b-4755-4934-a087-33fb24996526)
+![last magic](https://github.com/user-attachments/assets/bac624a4-6258-45f8-9e22-9403f1d21902)
 
-Screenshot of fast route guide present in `openlane/designs/picorv32a/runs/26-03_08-45/tmp/routing` directory
+![last magic 1](https://github.com/user-attachments/assets/2565fb68-0ffc-4f31-adb3-7a62a3679901)
 
-![Screenshot from 2024-03-26 15-41-18](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/1dc38a57-03c9-45c3-acdb-063731a86433)
+![last magic 2](https://github.com/user-attachments/assets/137b5632-e7ac-43ae-bcbd-0945b24ea31c)
 
-#### 3. Post-Route parasitic extraction using SPEF extractor.
 
-Commands for SPEF extraction using external tool
 
-```bash
-# Change directory
-cd Desktop/work/tools/SPEF_EXTRACTOR
+Screenshot of fast route guide present in `openlane/designs/picorv32a/runs/13-11_00-51/tmp/routing` directory
 
-# Command extract spef
-python3 main.py /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
-```
+![magic guide](https://github.com/user-attachments/assets/9092831d-752a-410a-903c-982e4ef7fe67)
 
-#### 4. Post-Route OpenSTA timing analysis with the extracted parasitics of the route.
+#### 3. Post-Route OpenSTA timing analysis with the extracted parasitics of the route.
 
 Commands to be run in OpenLANE flow to do OpenROAD timing analysis with integrated OpenSTA in OpenROAD
 
-```tcl
+```
 # Command to run OpenROAD tool
 openroad
 
 # Reading lef file
-read_lef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef
+read_lef /openLANE_flow/designs/picorv32a/runs/13-11_00-51/tmp/merged.lef
 
 # Reading def file
-read_def /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
+read_def /openLANE_flow/designs/picorv32a/runs/13-11_00-51/results/routing/picorv32a.def
 
 # Creating an OpenROAD database to work with
 write_db pico_route.db
@@ -6816,7 +6909,7 @@ write_db pico_route.db
 read_db pico_route.db
 
 # Read netlist post CTS
-read_verilog /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/synthesis/picorv32a.synthesis_preroute.v
+read_verilog /openLANE_flow/designs/picorv32a/runs/13-11_00-51/results/synthesis/picorv32a.synthesis_preroute.v
 
 # Read library for design
 read_liberty $::env(LIB_SYNTH_COMPLETE)
@@ -6831,7 +6924,7 @@ read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
 set_propagated_clock [all_clocks]
 
 # Read SPEF
-read_spef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.spef
+read_spef /openLANE_flow/designs/picorv32a/runs/13-11_00-51/results/routing/picorv32a.spef
 
 # Generating custom timing report
 report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
@@ -6842,25 +6935,14 @@ exit
 
 Screenshots of commands run and timing report generated
 
-![Screenshot from 2024-03-26 23-16-16](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/72ef3e8d-7ca2-4b60-89ea-de053f9c2902)
-![Screenshot from 2024-03-26 23-17-09](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/5cac9ce5-420a-4eaa-b5f4-09286701e550)
-![Screenshot from 2024-03-26 23-17-32](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/7d809f14-66b6-4dd6-8161-2ad8371cfaf9)
-![Screenshot from 2024-03-26 23-17-56](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/64ccb1d8-74aa-42b0-88d4-a0f9588d2ca2)
+![final openroad](https://github.com/user-attachments/assets/b8d3b9ca-af93-4203-9176-0e3c5163b560)
 
-# Certificate
+![final slack 1](https://github.com/user-attachments/assets/03c0e2a1-44e0-40bf-ab5e-59487af87771)
 
-![Digital-VLSI-SoC-Design-and-Planning-Certificate](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/6f292f50-f95b-471c-8dac-bf0ea7345c9b)
+![final slack 2](https://github.com/user-attachments/assets/eabbb930-aacd-490f-934b-5650619a2ba6)
 
-# Acknowledgements
-
-* [Kunal Ghosh](https://github.com/kunalg123), Co-founder, VSD Corp. Pvt. Ltd.
-* [Nickson P Jose](https://github.com/nickson-jose), Physical Design Engineer, Intel Corporation.
-* [R. Timothy Edwards](https://github.com/RTimothyEdwards), Senior Vice President of Analog and Design, efabless Corporation.
-
-
-
-  
-    
+![final slack 3](https://github.com/user-attachments/assets/d87067c0-c268-4ca4-b639-ca9b16a03a29)
+   
 
 ## References:
 
@@ -6874,6 +6956,8 @@ Screenshots of commands run and timing report generated
 *  https://github.com/KanishR1/Introduction-to-ASIC-Flow.git
 *  https://github.com/bhargav-vlsi/ASIC-Design-IIITB.git
 *  https://github.com/kunalg123/sky130RTLDesignAndSynthesisWorkshop.git
+*  https://github.com/nickson-jose
+*  https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd.git
 
   
   
