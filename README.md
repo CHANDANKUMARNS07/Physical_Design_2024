@@ -6941,6 +6941,9 @@ Screenshots of commands run and timing report generated
 
 ![final slack 3](https://github.com/user-attachments/assets/d87067c0-c268-4ca4-b639-ca9b16a03a29)
    
+##### Note:- <br/>
+* To open the inverter in magic tool, which is created by you name just click on the magic and go to the cell manager their under picorv32a, you can find your inverter name their when you click on zoom you are able to see that block.<br/>
+* Press 'z' for zoom-in, 'v' for zoom-out.<br/>
 
 ## References:
 
