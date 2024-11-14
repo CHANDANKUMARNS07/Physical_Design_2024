@@ -5321,7 +5321,7 @@ In this lab we are going through the workshop and implementing using openLANE to
 
 ### Implementation
 
-Section 1 tasks:- 
+Day 1 tasks:- 
 1. Run 'picorv32a' design synthesis using OpenLANE flow and generate necessary outputs.
 2. Calculate the flop ratio.
 
@@ -5400,7 +5400,7 @@ Percentage\ of\ DFF's = 0.108429685 * 100 = 10.84296854\ \%
 
 ### Implementation
 
-Section 2 tasks:- 
+Day 2 tasks:- 
 1. Run 'picorv32a' design floorplan using OpenLANE flow and generate necessary outputs.
 2. Calculate the die area in microns from the values in floorplan def.
 3. Load generated floorplan def in magic tool and explore the floorplan.
@@ -5578,7 +5578,7 @@ exit
 
 ### Implementation
 
-* Section 3 tasks:-
+* Day 3 tasks:-
 1. Clone custom inverter standard cell design from github repository: [Standard cell design and characterization using OpenLANE flow](https://github.com/nickson-jose/vsdstdcelldesign).
 2. Load the custom inverter layout in magic and explore.
 3. Spice extraction of inverter in magic.
@@ -5914,7 +5914,7 @@ Width of standard cell = 1.38um = 0.46 * 3
 Condition 3 verified
 
 ```
-Vertical\ track\ pitch = 0.34\ um
+Vertical track pitch = 0.34um
 ```
 
 ![condition 3](https://github.com/user-attachments/assets/a0123136-b724-4a90-b1ec-04e2f5b1e855)
@@ -5966,7 +5966,7 @@ Commands to copy necessary files to 'picorv32a' design 'src' directory
 
 ```bash
 # Copy lef file
-cp sky130_vsdinv.lef ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+cp sky_130_chandan_inv.lef ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
 
 # List and check whether it's copied
 ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
@@ -6222,8 +6222,6 @@ Newly created `pre_sta.conf` for STA analysis in `openlane` directory
 Newly created `my_base.sdc` for STA analysis in `openlane/designs/picorv32a/src` directory based on the file `openlane/scripts/base.sdc`
 
 ![sdc file](https://github.com/user-attachments/assets/20ae90bc-ca17-4254-b3a7-1f93bbc16b61)
-
-![Screenshot from 2024-03-26 05-55-38](https://github.com/fayizferosh/soc-design-and-planning-nasscom-vsd/assets/63997454/e07d05db-2f06-47ab-bff7-2af88c39d001)
 
 Commands to run STA in another terminal
 
@@ -6523,10 +6521,10 @@ Commands to be run in OpenLANE flow to do OpenROAD timing analysis with integrat
 openroad
 
 # Reading lef file
-read_lef /openLANE_flow/designs/picorv32a/runs/24-03_10-03/tmp/merged.lef
+read_lef /openLANE_flow/designs/picorv32a/runs/12-11_23-00/tmp/merged.lef
 
 # Reading def file
-read_def /openLANE_flow/designs/picorv32a/runs/24-03_10-03/results/cts/picorv32a.cts.def
+read_def /openLANE_flow/designs/picorv32a/runs/12-11_23-00/results/cts/picorv32a.cts.def
 
 # Creating an OpenROAD database to work with
 write_db pico_cts.db
@@ -6689,7 +6687,7 @@ Unlike the general ASIC flow, Power Distribution Network generation is not a par
 we can check whether PDN has been created or no by check the current def environment variable: ``` echo $::env(CURRENT_DEF)```
 
 ```
-prep -design picorv32a -tag Run 12.07.10.11
+prep -design picorv32a -tag Run 13-11_00-51
 gen_pdn
 
 ```
