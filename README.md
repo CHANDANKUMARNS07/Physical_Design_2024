@@ -6974,7 +6974,7 @@ It has 9 sections:-
 
 **50 Years of Microprocessor Trend Data:**
 
-![image](https://github.com/user-attachments/assets/04124b15-8ba2-4cd9-add6-fd003838fe6c)
+![Screenshot from 2024-11-25 21-04-08](https://github.com/user-attachments/assets/1c000d08-b9e7-4f33-903e-b2a7dcccd688)
 
 **The Key metrics are:**
 
@@ -6991,7 +6991,7 @@ It has 9 sections:-
 
 **Path to zetta-scale computing**
 
-![image](https://github.com/user-attachments/assets/7f0a1590-b0ca-4d90-8804-381b30bee78a)
+![Screenshot from 2024-11-25 21-04-44](https://github.com/user-attachments/assets/388c5c1b-6794-4072-96ac-d04fb11ae64c)
 
 The path to zetta-scale computing, tracing the evolution of computing performance (measured in FLOPS—floating-point operations per second) from the gigascale era in 1984 to the projected zettascale by 2035.
 
@@ -7005,7 +7005,7 @@ The path to zetta-scale computing, tracing the evolution of computing performanc
 
 **CMOS Evolution and Next-Gen Candidates**
 
-![image](https://github.com/user-attachments/assets/b621caad-384e-4c67-bb01-4504d153230a)
+![Screenshot from 2024-11-25 21-05-12](https://github.com/user-attachments/assets/a0b1ef62-289c-4600-af4a-d420ffdf8b34)
 
 This diagram illustrates the evolving landscape of CMOS (Complementary Metal-Oxide-Semiconductor) technology and highlights emerging materials, structures, and processes being explored for next-generation semiconductor devices. These innovations aim to address the challenges of scaling CMOS technology down to the 1nm node and beyond.
 
@@ -7060,7 +7060,7 @@ This diagram illustrates the evolving landscape of CMOS (Complementary Metal-Oxi
 
 #### FinFETs
 
-![image](https://github.com/user-attachments/assets/de21941f-7456-4522-b07f-a365cf9fe9b0)
+![Screenshot from 2024-11-25 21-05-42](https://github.com/user-attachments/assets/a8dcbcac-3c17-42e6-8164-52fe142c4ee7)
 
 This diagram illustrates the evolution of transistor technology from planar to more advanced architectures like FinFET and Gate-All-Around (GAA):
 
@@ -7080,7 +7080,7 @@ Each step improves drive current capability and enhances control over the transi
 
 **Why FinFETs and Gate-All-Around Transistors?**
 
-![image](https://github.com/user-attachments/assets/067b362e-bd68-40e4-b83c-60f2c3ef5797)
+![Screenshot from 2024-11-25 21-06-15](https://github.com/user-attachments/assets/36fb54ac-e683-44fd-b435-d1db60d57ad0)
 
 This diagram explains the advantages of FinFETs and Gate-All-Around (GAA) transistors compared to traditional planar structures:
 
@@ -7108,7 +7108,7 @@ This diagram explains the advantages of FinFETs and Gate-All-Around (GAA) transi
    - Illustrates the performance advantages of FinFETs and GAA over planar transistors.
    - Shows better efficiency and reduced sub-threshold slope as dimensions shrink.
 
-![image](https://github.com/user-attachments/assets/29504769-f396-4838-8ebb-abacfaf8a27f)
+![Screenshot from 2024-11-25 21-06-43](https://github.com/user-attachments/assets/843ee18f-669c-44b8-88a7-250f21f893a4)
 
 **Reduced Leakage:** Tri-Gate transistors exhibit significantly lower leakage current compared to planar transistors at the same gate voltage. Lower leakage results in both reduced off-current at the same on-current and lower power dissipation.
 
@@ -7120,7 +7120,7 @@ FEOL refers to the initial stages of semiconductor manufacturing where the activ
 
 **CMOS Technology Inflection Points**
 
-![image](https://github.com/user-attachments/assets/66560a1e-fd66-40dc-94ed-9de5938f045c)
+![Screenshot from 2024-11-25 21-07-15](https://github.com/user-attachments/assets/5d370579-7205-44d7-8a94-e67c05fe7bda)
 
 1. **Dennard Scaling**:
    - States that power density remains constant as transistors shrink.
@@ -7143,7 +7143,7 @@ FEOL refers to the initial stages of semiconductor manufacturing where the activ
 
 4. **Drive Voltage Scaling Graph (Bottom-left):** The graph shows the relationship between gate length (x-axis, logarithmic scale) and drive voltage (y-axis, logarithmic scale). The Ideal scaling behavior indicates that the voltage decreases linearly with shrinking gate length. Red and green markers show practical trends for low-power and high-performance devices, which deviate from ideal scaling due to challenges like leakage currents and increased power density.
 
-![image](https://github.com/user-attachments/assets/10c7507f-19a8-422c-9ef3-4f044e900766)
+![Screenshot from 2024-11-25 21-07-15](https://github.com/user-attachments/assets/5e597889-8e2f-4a99-b913-0a9849a47f2c)
 
 **Key Technology Nodes and Innovations**
 
@@ -7176,7 +7176,7 @@ FEOL refers to the initial stages of semiconductor manufacturing where the activ
   - Development of **CFET (Complementary FET)**, which vertically stacks NMOS over PMOS to save area.
   - Use of **2D materials**, such as **MoS₂**, for atomic-scale channel thickness in **2D FETs**.
 
-![image](https://github.com/user-attachments/assets/a8ad69be-9750-44f0-97b6-c39f1b58e18c)
+![Screenshot from 2024-11-25 21-08-14](https://github.com/user-attachments/assets/bbc8fc40-18a2-4261-a439-3f221977bcb7)
 
 The image illustrates how Samsung has scaled down the size of transistors in their successive generations of nodes (10nm, 8nm, 7nm, and 5nm) using a technique called Fin Depopulation. In FinFET transistors, the "fin" is the vertical channel that carries the current. Fin Depopulation involves reducing the number of fins per transistor while keeping the fin width constant. This allows for smaller transistors without compromising performance.
 
@@ -7185,7 +7185,7 @@ The image illustrates how Samsung has scaled down the size of transistors in the
 - 7nm (HD): The fin height remains at 27nm, but the number of fins is further reduced to 8.
 - 5nm (UHD): The fin height is maintained at 27nm, and the number of fins is decreased to 7.
 
-![image](https://github.com/user-attachments/assets/c6bc381c-f5de-4839-98a9-e61f56b61622)
+![Screenshot from 2024-11-25 21-08-48](https://github.com/user-attachments/assets/e85b88a4-4675-43cc-8131-68a9efd88995)
 
 - **Double Diffusion Break (DDB)**: Double Diffusion Break (DDB) involves creating a gap between the source and drain regions of a transistor. This gap is filled with an insulating material, which reduces the effective width of the transistor. By doing so, DDB enables the design of smaller cell sizes, allowing for higher transistor density and improved scalability. A cross-sectional view of a transistor with DDB highlights the insulating gap between the source and drain regions.
 
@@ -7197,7 +7197,7 @@ The image illustrates how Samsung has scaled down the size of transistors in the
 
 - **Back-Side Power Delivery Network (BS-PDN)**: The Back-Side Power Delivery Network (BS-PDN) is an innovative approach where power supply rails are routed on the backside of the chip. This method reduces the height of the standard cell, creating space for more transistors and improving overall transistor density. Additionally, it enhances power delivery efficiency and reduces resistance, which is crucial for high-performance applications. A schematic of a standard cell with BS-PDN illustrates the positioning of power rails on the backside of the chip.
 
-![image](https://github.com/user-attachments/assets/d8288063-a78a-40cb-a80b-7f9fe8d351bc)
+![Screenshot from 2024-11-25 21-09-16](https://github.com/user-attachments/assets/968ed076-8cf2-471d-aed3-2001f6fe87cf)
 
 - **Planar Technology**: In early planar technology nodes (100nm and above), the Vt variability is significantly high, around 130mV. This is due to various factors like process variations, temperature fluctuations, and line-edge roughness.
 
@@ -7205,7 +7205,7 @@ The image illustrates how Samsung has scaled down the size of transistors in the
 
 - **NW Technology (Nanowire)**: In the latest nanowire technology (14nm and below), the Vt variability is even lower, around 7mV. This further reduction is due to the precise control over the nanowire dimensions and the reduced impact of process variations.
 
-![image](https://github.com/user-attachments/assets/43ec16fc-dac1-4ac4-9492-ef7413e39ef6)
+![Screenshot from 2024-11-25 21-09-43](https://github.com/user-attachments/assets/9b30cfde-b8b6-47de-b78f-7ee461e2b2d0)
 
 **Planar MOSFETs**  
 Planar MOSFETs, the traditional architecture, have a simple structure where the gate sits above the channel. In this design, the contact width (\(W_C\)) and gate width (\(W_G\)) are nearly equal, resulting in a ratio of \(W_C / W_G \approx 1\). This leads to a low parasitic resistance, with \(R_{EXT}\) being much smaller than \(R_{ch}\) (\(R_{EXT} / R_{ch} < 1\)). As a result, planar MOSFETs suffer minimal performance degradation due to parasitic resistance.
@@ -7221,7 +7221,7 @@ Complementary FETs (CFETs) take transistor stacking to the next level by vertica
 
 **Explanation of Parasitic Resistance**
 
-![image](https://github.com/user-attachments/assets/6ab0011f-36de-4821-ab59-74fa2ce2beda)
+![Screenshot from 2024-11-25 21-10-30](https://github.com/user-attachments/assets/5205b960-b22c-4dda-9632-ec5d12b1b102)
 
 The image highlights the breakdown of parasitic resistance (\(R_{EXT}\)) and approaches for reducing it in transistors. Here is a detailed explanation:
 
@@ -7259,7 +7259,7 @@ The right section discusses methods to improve the metal-semiconductor interface
 - **Metal-Semiconductor Energy Diagram**:
   - The energy diagram shows how a reduction in \(\phi_b\) (Schottky Barrier Height) facilitates easier carrier injection from the metal to the semiconductor.
 
-![image](https://github.com/user-attachments/assets/ed9743a8-c9f0-43d5-9ccd-4b239f8718ac)
+![Screenshot from 2024-11-25 21-12-10](https://github.com/user-attachments/assets/fb42ed4e-0f31-42cc-a8f6-b9f45d763107)
 
 The bar chart on the left shows how the composition of \(C_{eff}\) evolves from 22nm to 7nm technology nodes:
 
@@ -7274,7 +7274,7 @@ Plot Descriptions:
 - The rightmost figure shows the evolution of spacer materials from SiOCN to SiCO. This material transition aims to significantly reduce the gate-contact capacitance across nodes. At 14nm and beyond, low-\(k\) spacers improve performance by decoupling parasitic effects and maintaining capacitance at manageable levels.
 - The bottom middle image shows a cross-sectional TEM view of a transistor with air spacers around the gate: i) Air, with its extremely low dielectric constant (\(k \approx 1\)), significantly reduces parasitic capacitance. The adjacent plot quantifies this improvement, showing a 15% reduction in \(C_{eff}\) when using air spacers compared to solid spacers.
 
-![image](https://github.com/user-attachments/assets/848c85f2-a2d5-4872-9690-b6eaf1a11dd2)
+![Screenshot from 2024-11-25 21-12-37](https://github.com/user-attachments/assets/38edf3bd-e8f7-44bd-98d2-9c08682c8970)
 
 **Key Properties of 2D Layered Materials (Compared to Silicon):**
 
@@ -7282,7 +7282,7 @@ Plot Descriptions:
 - **Higher Effective Mass (\( m^* \)):** MoS₂ has an effective mass of about 0.55 times the mass of a free electron (\( m_0 \)), whereas silicon’s effective mass is around 0.22 \( m_0 \).
 - **Bandgap:** Additionally, 2D materials like MoS₂ possess favorable bandgaps for electronic devices, with a monolayer bandgap of ~1.85 eV, which reduces to ~1.5 eV for a bilayer.
 
-![image](https://github.com/user-attachments/assets/957f8ce6-cd3d-4fd3-bd3e-c99909752cdf)
+![Screenshot from 2024-11-25 21-13-04](https://github.com/user-attachments/assets/984e9e0a-d636-4ec0-9d12-4358b7f027d4)
 
 1. **Transistor Scaling**:  
    - To achieve smaller gate lengths, devices must address various physical and material constraints to ensure reliable operation.
@@ -7301,7 +7301,7 @@ Plot Descriptions:
 4. **Key Takeaway**:  
    - New channel materials, such as 2D materials, are required to overcome these challenges while maintaining high performance and scalability.
 
-![image](https://github.com/user-attachments/assets/716a2a87-2051-4de1-be37-aa4f70f73fa0)
+![Screenshot from 2024-11-25 21-13-41](https://github.com/user-attachments/assets/44466805-c2a3-4736-bc60-3f5f013a3c53)
 
 Concept of Direct Source-to-Drain Tunneling: As the gate length (\(L_G\)) in MOSFETs decreases, direct tunneling of electrons from the source to the drain becomes significant, leading to increased leakage currents. This leakage is influenced by material properties, such as the effective mass (\(m^*\)) and the bandgap (\(E_G\)).
 
@@ -7309,11 +7309,11 @@ A higher \(m^*\) in MoS₂ suppresses tunneling leakage compared to silicon. The
 
 The superior performance of MoS₂ in minimizing leakage currents results in significant energy savings, making it a promising material for future transistor scaling.
 
-![image](https://github.com/user-attachments/assets/333769a9-e265-4e58-ba3a-47dffc7ac60e)
+![Screenshot from 2024-11-25 21-14-42](https://github.com/user-attachments/assets/cdd61eaa-5f27-422d-ad8e-eddd95b6676c)
 
 The MoS₂ transistor with a 1 nm gate length represents a breakthrough in miniaturization, featuring a thin MoS₂ channel for its excellent electronic properties. A single-walled carbon nanotube (SWCNT) serves as the ultra-small gate electrode, while Zirconium Dioxide (ZrO₂) acts as a high-k dielectric, reducing leakage and ensuring precise control. Built on a SiO₂ substrate with an n⁺ silicon back gate, the transistor uses the CNT gate to deplete a small region of the MoS₂ channel, enabling efficient modulation. This innovative design showcases the potential of 2D materials and nanoscale gates in advancing transistor technology.
 
-![image](https://github.com/user-attachments/assets/e2eef453-2d6f-4a72-ae50-5aa6d36bdfeb)
+![Screenshot from 2024-11-25 21-15-17](https://github.com/user-attachments/assets/2192477e-e62b-4a49-a3a1-eb3dd577e3b4)
 
 The slide illustrates the structure and fabrication of an All-2D MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor), where all key components, including the channel, gate, and contacts, are made using two-dimensional materials. This device leverages the exceptional properties of 2D materials to improve performance and scalability. Below is a breakdown of the key components and the fabrication process:
 
@@ -7336,7 +7336,7 @@ Fabrication Process:
 - A top layer of graphene is deposited and aligned as the gate electrode.
 - The completed device is contacted using metallic electrodes (Ni/Au) for testing.
 
-![image](https://github.com/user-attachments/assets/2fc6e2ec-8754-42c5-af4a-7900be09703a)
+![Screenshot from 2024-11-25 21-15-47](https://github.com/user-attachments/assets/d9837f17-8157-45ad-84e3-5ec1c0834ab3)
 
 The All-2D MOSFET exhibits excellent electrical performance:
 
@@ -7346,7 +7346,7 @@ The All-2D MOSFET exhibits excellent electrical performance:
 
 These results highlight the potential of 2D materials like MoS₂, graphene, and h-BN for scalable, high-performance transistor applications.
 
-![image](https://github.com/user-attachments/assets/24936d7c-1d95-4150-adab-639feb54d0b0)
+![Screenshot from 2024-11-25 21-16-33](https://github.com/user-attachments/assets/5404fc71-34cf-4ed5-bd57-145607dff70e)
 
 The diagram on the top left shows a non-planar transistor with key components:
 
