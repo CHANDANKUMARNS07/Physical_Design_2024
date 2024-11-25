@@ -7619,6 +7619,7 @@ As already defined the flow structure in the section 3 of this lab i will follow
 * And all the files are included as per the flow structure.<br/>
 The below is the config.mk file.<br/>
 ```
+make # when you change in make file use this command or else use below command in flow directory
 make DESIGN_CONFIG=./designs/sky130hd/VSDbabySOC_chandan/config.mk
 make gui_floorplan
 make gui_place
@@ -7626,6 +7627,7 @@ make gui_cts
 make gui_route
 make gui_final
 ```
+![Screenshot from 2024-11-26 01-38-36](https://github.com/user-attachments/assets/bc35914c-68c8-4347-bb45-58205dc8173d)
 photo of config
 photo of running config file
 qor photo
