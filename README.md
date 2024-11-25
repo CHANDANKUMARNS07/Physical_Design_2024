@@ -6962,6 +6962,8 @@ It has 9 sections:-
 8) Report Issue and contribute with PR.
 9) Sample Design contest attempts by contest TAs.
 
+Section 1:- Latest developments in CMOS technology and its implications on Circuits design.<br/>
+
 #### Path to Zetta-Scale Computing
 
 **Introduction:**
@@ -7398,24 +7400,24 @@ BS-PDNs involve routing power supply rails on the backside of the chip, enabling
 
 By adopting BS-PDNs, semiconductor manufacturers can develop high-performance and energy-efficient integrated circuits that meet the demands of modern electronics.
 
+Section 2:- Tools Installation.<br/>
 
-**Installing and setting up ORFS**
+**Installing and setting up OpenROAD**
 
 ```
-git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts
+git clone https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts
 cd OpenROAD-flow-scripts
 sudo ./setup.sh
 ```
+![1_0_term](https://github.com/user-attachments/assets/d2b634fb-c7b6-44d1-85cf-b9790cfa56d6)
+![term_1_0](https://github.com/user-attachments/assets/1a412b13-ca0d-47cd-beab-ac7d6a72b363)
 
-1photo
-2photo
 ```
 ./build_openroad.sh --local
 ```
 
-3photo
+![term_02](https://github.com/user-attachments/assets/306fde49-b2be-4145-bcd3-1c7c9d726454)
 
-4photo
 
 **Verify Installation**
 
@@ -7426,17 +7428,17 @@ openroad -help
 cd flow
 make
 ```
-5photo
 
-6photo
+
+
 
 ```
 make gui_final
 ```
-7photo
 
 
-**ORFS Directory Structure and File formats**
+
+**OpenROAD Directory Structure and File formats**
 
 
 
