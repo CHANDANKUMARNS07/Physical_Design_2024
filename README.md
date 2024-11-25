@@ -7357,7 +7357,7 @@ The diagram on the top left shows a non-planar transistor with key components:
 
 The biggest challenge is to form a single-crystalline semiconductors on a non-planar surface is difficult using conventional semiconductor fabrication techniques.
 
-![image](https://github.com/user-attachments/assets/09db667f-dd86-4ba5-9357-29bc6124febb)
+![Screenshot from 2024-11-25 21-17-37](https://github.com/user-attachments/assets/0af9b492-222a-4585-96f9-c37c60891d1f)
 
 Single-Layer CMOS (a): This is the traditional CMOS design where NMOS and PMOS transistors are fabricated on a single silicon layer. Each transistor operates in the same planar layer, with devices connected laterally.
 
@@ -7367,7 +7367,7 @@ Single-Layer CMOS Logic (c): Shows logic gates (inverter, 2-input NAND, and 2-in
 
 Monolithic 3D CMOS Logic (d): Logic gates are constructed with two transistor layers (Layer 1 and Layer 2), reducing the area required for interconnections. Vertical integration improves performance and reduces delay by shortening signal paths.
 
-![image](https://github.com/user-attachments/assets/a83936b9-267d-4e3f-a1b5-8539b156b712)
+![Screenshot from 2024-11-25 21-18-01](https://github.com/user-attachments/assets/b03e2493-a1ff-4dd3-b1f6-c8fe52853e71)
 
 
 **Dual Damascene Cu**, used for the 7nm technology node with a 36nm pitch, combines vias (vertical connections) and lines (horizontal connections) in a single patterning step. It relies on copper (Cu) for interconnections; however, as dimensions shrink, challenges such as gap filling and maintaining reliability become increasingly significant.
@@ -7380,11 +7380,11 @@ At sub-18nm pitch, **subtractive RIE** and alternative metals like ruthenium (Ru
 
 For future nodes with pitches below 15nm, **post-Damascene interconnects** featuring tall, barrier-less designs are envisioned. This approach enhances electromigration (EM) reliability, ensuring durable and robust connections despite the continued shrinking of dimensions, thereby addressing key challenges in advanced interconnect scaling.
 
-![image](https://github.com/user-attachments/assets/b0e1ee7f-3987-4ad4-b1ed-6030fcd2b1bf)
+![Screenshot from 2024-11-25 21-18-23](https://github.com/user-attachments/assets/044dffe5-df55-4062-bf2f-d93212408b40)
 
 The image shows how a selective barrier, typically tantalum nitride (TaN), can improve copper interconnects in semiconductor manufacturing. This barrier reduces resistance, enhances reliability by preventing copper ion migration, and aids in controlling copper thickness. The process involves cleaning the copper surface, depositing TaN using atomic layer deposition (ALD), and removing sacrificial layers. This technique is crucial for advancing semiconductor technology and ensuring reliable, high-performance devices.
 
-![image](https://github.com/user-attachments/assets/b1083105-a723-4f5f-aa37-5f3c5bf1a9be)
+![Screenshot from 2024-11-25 21-18-47](https://github.com/user-attachments/assets/e7198a91-a2c6-4540-be11-15afad3456a8)
 
 **Back-Side Power Delivery Network (BS-PDN)**
 
