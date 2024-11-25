@@ -7409,8 +7409,8 @@ git clone https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts
 cd OpenROAD-flow-scripts
 sudo ./setup.sh
 ```
-![1_0_term](https://github.com/user-attachments/assets/d2b634fb-c7b6-44d1-85cf-b9790cfa56d6)
-![term_1_0](https://github.com/user-attachments/assets/1a412b13-ca0d-47cd-beab-ac7d6a72b363)
+![Screenshot from 2024-11-25 23-55-30](https://github.com/user-attachments/assets/ec5bcc6f-10e2-48ad-a39f-dabec3acefbd)
+![Screenshot from 2024-11-25 23-55-59](https://github.com/user-attachments/assets/15e99c68-066f-4b67-b443-e42e3f1c7baa)
 
 ```
 ./build_openroad.sh --local
