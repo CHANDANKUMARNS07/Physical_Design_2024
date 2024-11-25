@@ -7528,6 +7528,88 @@ Floorplan<br/>
 ![klout_10](https://github.com/user-attachments/assets/ba714696-7c11-46c6-b593-066106e4a949)
 ![kloyout_11](https://github.com/user-attachments/assets/3b999bf1-3302-4f18-9bdb-e425516795bc)
 
+### Section 7:- Design exploration using Autotuner.
+Go to the given link of OpenROAD documentation their you will get how to use it https://openroad-flow-scripts.readthedocs.io/en/latest/user/InstructionsForAutoTuner.html#.<br/>
+```
+pip3.9 install -U --user 'ray[default,tune]==1.11.0' ax-platform hyperopt nevergrad optuna pandas
+or if above not works then use below
+python3.9 -m pip install -U --user 'ray[default,tune]==1.11.0' ax-platform hyperopt nevergrad optuna pandas
+
+pip3.9 install -U --user colorama==0.4.4 bayesian-optimization==1.4.0
+or 
+python3.9 -m pip install -U --user colorama==0.4.4 bayesian-optimization==1.4.0
+
+cd flow/util/
+python3 distributed.py tune -h
+python3 distributed.py --design gcd --platform sky130hd \
+                       --config ../../../../flow/designs/sky130hd/gcd/autotuner.json \
+                       tune
+                       or if above not works then use below
+python3.9 distributed.py --design gcd --platform sky130hd \
+                       --config ../../../../flow/designs/sky130hd/gcd/autotuner.json \
+                       tune --samples 5
+                       
+tensorboard --logdir=../logs/sky130hd/gcd/test-tune-__date__/
+```
+![term_autotner_8](https://github.com/user-attachments/assets/3c6ca589-c595-40cb-97a3-61b1c64e48c6)
+![term_9](https://github.com/user-attachments/assets/b00c79d4-e5ee-4662-b360-ecce4f0632e8)
+![term_10](https://github.com/user-attachments/assets/e6c9e2de-e524-4ed3-ba6c-3581ba9944da)
+### Section 8 & Section 9 :- 
+This section is all about the updating any issue is found in openroad and opensta resolve it and update it to the git hub.<br/>
+Opensta.<br/>
+```
+cmake .
+make -j27
+test/regression
+time test/regression
+gedit verilog/VerilogReader.cc
+make
+time test/regression
+cd test/results/
+ls
+cat delay_calc.log
+```
+![term_0_11](https://github.com/user-attachments/assets/bb95cadf-5ef3-43e9-8afd-cdbc13720822)
+![term_0_11_1](https://github.com/user-attachments/assets/0ac2a1b1-3fed-42fa-9112-e5591b533c37)
+![term_0_11_2](https://github.com/user-attachments/assets/07a528be-8f1e-4244-a7eb-4079cc0b88b9)
+
+![term_0_11_3](https://github.com/user-attachments/assets/6cac6d33-9436-474a-b47f-85955014a295)
+![term_0_11_5](https://github.com/user-attachments/assets/f56dea68-b5c5-426a-901e-4c6389d075d5)
+
+OpenROAD.<br/>
+```
+git clone https://github.com/CHANDANKUMARNS07/OpenROAD-flow-scripts.git
+cd OpenROAD-flow-scripts
+cd flow
+# go into the asap7 design and also open gcd.v file in src folder 
+cd ../../
+make DESIGN_CONFIG=./designs/asap7/gcd/config.mk 
+#see the 4_1_cts.log their the time 
+#and change the cts.tcl file by adding two commands
+#before executing below command first clear the previous results otherwise it will be of no effect
+rm -rf logs/sky130hd/ results/sky130hd/ reports/sky130hd/ objects/sky130hd/
+make DESIGN_CONFIG=./designs/asap7/gcd/config.mk 
+cd ..
+git status
+git add .
+git commit -a -m "cts file has been updated with :? operator"
+git push
+git diff
+```
+![term_12_0](https://github.com/user-attachments/assets/c353a246-e2e8-4e10-9242-fb5634552f8f)
+![term_12_1](https://github.com/user-attachments/assets/1eec78f1-d02d-44f1-bec1-82230abe0b05)
+![term_12_2](https://github.com/user-attachments/assets/0d2ea349-b842-43c2-bca5-f4a8d5eb5cd0)
+Before changing the cts file.<br/>
+![term_12_4](https://github.com/user-attachments/assets/466fcbe5-536a-4dbe-adae-d0840d66d6cf)
+![term_12_5](https://github.com/user-attachments/assets/00d21584-882d-47a5-b822-c5eaf260b585)
+After changing the cts file.<br/>
+![term_12_6](https://github.com/user-attachments/assets/be8e1fed-6856-4ad1-b2df-607319b39b84)
+Difference.<br/>
+![term_12_7](https://github.com/user-attachments/assets/b183547a-67fa-4a68-bb09-ae702a497c36)
+The lines which i changed.<br/>
+![term_12_8](https://github.com/user-attachments/assets/a7f9a7df-51dd-4221-ab0d-45a005db15eb)
+CTS layout.<br/>
+![klayout_12](https://github.com/user-attachments/assets/192a8668-c1a8-48d2-9a6d-cdc8b580670b)
 
 
 ## References:
