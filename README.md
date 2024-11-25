@@ -6962,7 +6962,7 @@ It has 9 sections:-
 8) Report Issue and contribute with PR.
 9) Sample Design contest attempts by contest TAs.
 
-Section 1:- Latest developments in CMOS technology and its implications on Circuits design.<br/>
+### Section 1:- Latest developments in CMOS technology and its implications on Circuits design.<br/>
 
 #### Path to Zetta-Scale Computing
 
@@ -7400,7 +7400,7 @@ BS-PDNs involve routing power supply rails on the backside of the chip, enabling
 
 By adopting BS-PDNs, semiconductor manufacturers can develop high-performance and energy-efficient integrated circuits that meet the demands of modern electronics.
 
-Section 2:- Tools Installation.<br/>
+### Section 2:- Tools Installation.<br/>
 
 **Installing and setting up OpenROAD**
 
@@ -7432,7 +7432,7 @@ make gui_final
 ![klayout_2](https://github.com/user-attachments/assets/7b7e624e-0345-4c4d-9846-468ed9c4035e)
 ![klayout_1](https://github.com/user-attachments/assets/30c21e53-ed28-4659-8ca3-2a22f6f4f751)
 
-Section 3:- Flow Structure.<br/>
+### Section 3:- Flow Structure.<br/>
 **OpenROAD Directory Structure and File formats**
 
 
@@ -7460,7 +7460,8 @@ Now, go to flow directory
 │   ├── scripts             
 ```
 
-Section 4:- Automated RTL2GDS Flow for VSDBabySoC.<br/>
+### Section 4:- Automated RTL2GDS Flow for VSDBabySoC.<br/>
+This is done by seeing the workshop video.<br/>
 
 Initial Steps:
 
@@ -7468,14 +7469,66 @@ Initial Steps:
 - Now copy the folders `gds`, `include`, `lef` and `lib` from the VSDBabySoC folder in your system into this directory.
   - The `gds` folder would contain the files `avsddac.gds` and `avsdpll.gds`
   - The `include` folder would contain the files `sandpiper.vh`, `sandpiper_gen.vh`, `sp_default.vh` and `sp_verilog.vh`
-  - The `gds` folder would contain the files `avsddac.lef` and `avsdpll.lef`
-  - The `lib` folder would contain the files `avsddac.lib` and `avsdpll.lib`
-- Now copy the constraints file(`vsdbabysoc_synthesis.sdc`) from the VSDBabySoC folder in your system into this directory.
-- Now copy the files(`macro.cfg` and `pin_order.cfg`) from the VSDBabySoC folder in your system into this directory.
-- Now, create a macro.cfg file whose contents are shown below:
+  - The `lef` folder would contain the files `avsddac.lef` and `avsdpll.lef`
+  - The `Additional lib` folder would contain the files `avsddac.lib` and `avsdpll.lib`
+- Now copy the constraints file(`vsdbabysoc_synthesis.sdc`) from the VSDBabySoC folder in your system into this directory which we used previously for the above lab work.
+- Now copy the files(`macro.cfg` and `pin_order.cfg`) from the VSDBabySoC folder in your system into this directory or else in the config.mk file use the dia and core area command, it will automatically places the macros.<br/>
 
+### Section 5:- OpenROAD GUI.
+&
+### Section 6:- Macro Placement RTL MP and QOR.<BR/>
+Here in both the section we just opened the gui file of gcd design of nangate45 platform and ariane136 design, which we run the make command and after once it is fully completed then we opened the gui of floorplan, placement, cts, route, final.
+The commands are:-
 ```
+# Assuming you should be inside the OpenROad directory inside flow folder then run below commands.
+make # by default makefile will have the gcd as the default design
+# or
+make DESIGN_CONFIG=./designs/nangate45/gcd/config.mk
+make DESIGN_CONFIG=./designs/nangate45/ariane136/config.mk
+make gui_floorplan
+make gui_place
+make gui_cts
+make gui_route
+make gui_final
+# or we can open the gui file and their we select the .odb file going through the results folder of nangate45 platform
+source ./env.sh # go to the OpenROAD directory then run this command then below command
+openroad -gui
+make metadata
+gedit designs/nangate45/gcd/metadata-base-ok.json
 ```
+GCD
+![term_2](https://github.com/user-attachments/assets/b65da2b3-46d7-4f17-bd4c-fd19e8f3e8c7)
+![term_3](https://github.com/user-attachments/assets/156ba6ed-5605-4bd2-bf7b-74c7fa13bfb9)
+![term_4](https://github.com/user-attachments/assets/351acfe7-4ce3-4fe4-9e03-790efb69d762)
+
+Floorplan<br/>
+![klout_3](https://github.com/user-attachments/assets/97aca48d-3dcc-4952-af26-f1eb8e6b9110)
+
+Placement<br/>
+![kloyot_4](https://github.com/user-attachments/assets/ca24e47b-fedb-4406-9b18-626fc29204bd)
+Heat maps <br/>
+![klyout_5](https://github.com/user-attachments/assets/b528a7db-7595-4d05-a0ed-f403f1453f9d)
+
+CTS<br/>
+![kloyout_6](https://github.com/user-attachments/assets/43cf8d22-b182-459b-b3a5-50d56ee15c61)
+![kloyout_7](https://github.com/user-attachments/assets/347f43b7-150d-4b7d-b982-865494ecb150)
+
+Final<br/>
+![klayout_8](https://github.com/user-attachments/assets/c3b54600-597f-4c96-b7b4-686e7846adce)
+![kloyut_9](https://github.com/user-attachments/assets/74a7febe-d195-43ce-886b-34915f797aa0)
+
+Ariane136
+![term_5_0](https://github.com/user-attachments/assets/e42091c8-3faf-46fe-a8a8-1cdc9cac98e7)
+![term_5](https://github.com/user-attachments/assets/af3420d2-c200-4014-9440-2b21e88191c6)
+![term_6](https://github.com/user-attachments/assets/f7886729-821e-4ca8-9229-8fd5b5b00e09)
+![term_6_1](https://github.com/user-attachments/assets/a9e5c973-75f9-4c2f-9593-899a4e9a5fdd)
+![term_metadata_7](https://github.com/user-attachments/assets/7ac69508-0979-47ea-b3c5-73fbca1ab7ce)
+
+Floorplan<br/>
+![klout_10](https://github.com/user-attachments/assets/ba714696-7c11-46c6-b593-066106e4a949)
+![kloyout_11](https://github.com/user-attachments/assets/3b999bf1-3302-4f18-9bdb-e425516795bc)
+
+
 
 ## References:
 
