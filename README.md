@@ -7611,6 +7611,23 @@ The lines which i changed.<br/>
 CTS layout.<br/>
 ![klayout_12](https://github.com/user-attachments/assets/192a8668-c1a8-48d2-9a6d-cdc8b580670b)
 
+### By using the above workshop knowledge we use the OpenROAD opensource tool for running our vsdbabysoc which we used in previous labs.
+As already defined the flow structure in the section 3 of this lab i will follow the same structure.<br/>
+* At first we make the design folder named VSDbabySOC_chandan inside the designs folder.<br/>
+* And all the files are included as per the flow structure.<br/>
+The below is the config.mk file.<br/>
+```
+make DESIGN_CONFIG=./designs/sky130hd/VSDbabySOC_chandan/config.mk
+make gui_floorplan
+make gui_place
+make gui_cts
+make gui_route
+make gui_final
+```
+photo of config
+photo of running config file
+qor photo
+heat maps photo
 
 ## References:
 
