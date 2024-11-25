@@ -7405,7 +7405,7 @@ By adopting BS-PDNs, semiconductor manufacturers can develop high-performance an
 **Installing and setting up OpenROAD**
 
 ```
-git clone https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts
+git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts
 cd OpenROAD-flow-scripts
 sudo ./setup.sh
 ```
@@ -7476,9 +7476,7 @@ Initial Steps:
 - Now copy the constraints file(`vsdbabysoc_synthesis.sdc`) from the VSDBabySoC folder in your system into this directory which we used previously for the above lab work.
 - Now copy the files(`macro.cfg` and `pin_order.cfg`) from the VSDBabySoC folder in your system into this directory or else in the config.mk file use the dia and core area command, it will automatically places the macros.<br/>
 
-### Section 5:- OpenROAD GUI.
-&
-### Section 6:- Macro Placement RTL MP and QOR.<BR/>
+### Section 5:- OpenROAD GUI. & Section 6:- Macro Placement RTL MP and QOR.<BR/>
 Here in both the section we just opened the gui file of gcd design of nangate45 platform and ariane136 design, which we run the make command and after once it is fully completed then we opened the gui of floorplan, placement, cts, route, final.
 The commands are:-
 ```
