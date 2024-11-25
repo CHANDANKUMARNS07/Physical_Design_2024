@@ -7415,10 +7415,6 @@ sudo ./setup.sh
 ```
 ./build_openroad.sh --local
 ```
-
-![term_1](https://github.com/user-attachments/assets/da60ca2e-ee62-4ca9-b0e0-11e375041a98)
-
-
 **Verify Installation**
 
 ```
@@ -7428,18 +7424,16 @@ openroad -help
 cd flow
 make
 ```
-
-
-
+![term_1](https://github.com/user-attachments/assets/da60ca2e-ee62-4ca9-b0e0-11e375041a98)
 
 ```
 make gui_final
 ```
+![klayout_2](https://github.com/user-attachments/assets/7b7e624e-0345-4c4d-9846-468ed9c4035e)
+![klayout_1](https://github.com/user-attachments/assets/30c21e53-ed28-4659-8ca3-2a22f6f4f751)
 
-
-
+Section 3:- Flow Structure.<br/>
 **OpenROAD Directory Structure and File formats**
-
 
 
 ``` 
@@ -7466,7 +7460,7 @@ Now, go to flow directory
 │   ├── scripts             
 ```
 
-Automated RTL2GDS Flow for VSDBabySoC:
+Section 4:- Automated RTL2GDS Flow for VSDBabySoC.<br/>
 
 Initial Steps:
 
