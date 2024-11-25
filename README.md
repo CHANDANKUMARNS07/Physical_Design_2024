@@ -7415,6 +7415,8 @@ sudo ./setup.sh
 ```
 ./build_openroad.sh --local
 ```
+![Screenshot from 2024-11-26 00-00-19](https://github.com/user-attachments/assets/47f433bc-cffa-4c47-ba5c-ad4df83e9b10)
+
 **Verify Installation**
 
 ```
