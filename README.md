@@ -7438,7 +7438,6 @@ make gui_final
 
 **ORFS Directory Structure and File formats**
 
-![image](https://github.com/user-attachments/assets/e4f741ad-3f48-4e9a-a799-c8ff95bc74cf)
 
 
 ``` 
@@ -7454,7 +7453,6 @@ make gui_final
 
 Now, go to flow directory
 
-![image](https://github.com/user-attachments/assets/70cb9a6b-b48c-497e-a050-dd6a5b90ea1d)
 
 ``` 
 ├── flow           
