@@ -7587,7 +7587,6 @@ make DESIGN_CONFIG=./designs/asap7/gcd/config.mk
 #see the 4_1_cts.log their the time 
 #and change the cts.tcl file by adding two commands
 #before executing below command first clear the previous results otherwise it will be of no effect
-rm -rf logs/sky130hd/ results/sky130hd/ reports/sky130hd/ objects/sky130hd/
 make DESIGN_CONFIG=./designs/asap7/gcd/config.mk 
 cd ..
 git status
@@ -9419,8 +9418,14 @@ The path is highlighted below: <br/>
 ![7_0_k_3](https://github.com/user-attachments/assets/809c8a7f-2c25-4e26-9dfa-1969007b15ba)
 ![7_0_k_2](https://github.com/user-attachments/assets/d46b07b3-7211-438d-8f93-4e1b37fe95ac)
 
-Note:- You can verify that i have used my design you can see the clk_chandan in the reports and also the path name in the screenshot and also the terminal.
+Note:- 
+* You can verify that i have used my design you can see the clk_chandan in the reports and also the path name in the screenshot and also the terminal.<br/>
+* If we want to run again the design file first we have to delete the older ones which are created, for that follow below command.<br/>
+```
+rm -rf logs/sky130hd/ results/sky130hd/ reports/sky130hd/ objects/sky130hd/
 
+```
+* All the files are uploaded to this repository including my reports, design files.<br/>
 ## References:
 
 *  https://forgefunder.com/~kunal/riscv_workshop.vdi
