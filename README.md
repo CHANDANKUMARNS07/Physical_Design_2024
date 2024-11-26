@@ -9388,6 +9388,38 @@ Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
 Total                  1.02e-02   8.70e-03   3.74e-08   1.89e-02 100.0%
                           54.0%      46.0%       0.0%
 ```
+### Heatmap <br/>
+In physical design of semiconductor chips, a heatmap is a visual representation that shows the distribution of a particular parameter (such as power, temperature, or congestion) across the chip's layout. It uses color coding to represent varying values of the parameter, with each color corresponding to a specific range or intensity of that parameter. Heatmaps are used to provide a quick, intuitive understanding of how different regions of the chip are behaving with respect to specific design goals or constraints.<br/>
+The heatmap of the design can be found using:
+```
+make gui_place
+```
+![Screenshot from 2024-11-26 05-46-38](https://github.com/user-attachments/assets/9b7f49c9-d125-44f8-bb7a-6f705af6c777)
+
+![image](https://github.com/user-attachments/assets/e151755a-e815-4a9c-bb23-0ca9299fcd0b)<br/>
+Zoomed view of all macros:<br/>
+![2_k_1](https://github.com/user-attachments/assets/33ff1959-8280-41d8-9f16-f260518bd5c8)
+![3_k_1](https://github.com/user-attachments/assets/5af1f75f-9490-40e2-820b-d7b73d2fa02f)
+![4_k_1](https://github.com/user-attachments/assets/493d167a-0051-4afb-af66-17faada91d47)
+![5_k_1](https://github.com/user-attachments/assets/afd5d32f-8ef9-4103-bf75-65886b4860ef)
+![6_k_2](https://github.com/user-attachments/assets/44c3e1c1-a549-49d1-8afa-b6cb2a9c17e3)
+
+![6_k_4](https://github.com/user-attachments/assets/55c2edef-0319-458d-8f6f-9ca4e4f437f6)
+
+### QoR <br/>
+QoR stands for Quality of Results. It refers to a set of metrics used to evaluate the quality of a chip's physical design after various stages of the design process. <br/>
+For this, we see timing as a metric and use CTS. 
+```
+make gui_cts
+```
+![Screenshot from 2024-11-26 05-46-04](https://github.com/user-attachments/assets/0ac2182c-347d-4742-bc2b-2e251fdd4600)
+
+The path is highlighted below: <br/>
+![7_0_k_5](https://github.com/user-attachments/assets/f6c9c8bf-a9b4-44cf-9cc4-ec52c29f2133)
+![7_0_k_3](https://github.com/user-attachments/assets/809c8a7f-2c25-4e26-9dfa-1969007b15ba)
+![7_0_k_2](https://github.com/user-attachments/assets/d46b07b3-7211-438d-8f93-4e1b37fe95ac)
+
+Note:- You can verify that i have used my design you can see the clk_chandan in the reports and also the path name in the screenshot and also the terminal.
 
 ## References:
 
