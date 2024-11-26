@@ -9426,6 +9426,7 @@ rm -rf logs/sky130hd/ results/sky130hd/ reports/sky130hd/ objects/sky130hd/
 
 ```
 * All the files are uploaded to this repository including my reports, design files.<br/>
+* And other thing is i have opened so many times the gui file so that you can see the so many instances of it, i took the screenshot of it only at the first time running it. And you can also verify by seeing the terminal name which is same as before ms2024007@ms2024007.<br/>
 ## References:
 
 *  https://forgefunder.com/~kunal/riscv_workshop.vdi
