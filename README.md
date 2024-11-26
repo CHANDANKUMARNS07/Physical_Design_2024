@@ -9394,8 +9394,8 @@ The heatmap of the design can be found using:
 make gui_place
 ```
 ![Screenshot from 2024-11-26 05-46-38](https://github.com/user-attachments/assets/9b7f49c9-d125-44f8-bb7a-6f705af6c777)
+![1_k](https://github.com/user-attachments/assets/b32b67f7-49e2-4c82-be2b-01d91e99dea5)
 
-![image](https://github.com/user-attachments/assets/e151755a-e815-4a9c-bb23-0ca9299fcd0b)<br/>
 Zoomed view of all macros:<br/>
 ![2_k_1](https://github.com/user-attachments/assets/33ff1959-8280-41d8-9f16-f260518bd5c8)
 ![3_k_1](https://github.com/user-attachments/assets/5af1f75f-9490-40e2-820b-d7b73d2fa02f)
