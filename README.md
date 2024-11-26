@@ -9408,6 +9408,7 @@ Zoomed view of all macros:<br/>
 ### QoR <br/>
 QoR stands for Quality of Results. It refers to a set of metrics used to evaluate the quality of a chip's physical design after various stages of the design process. <br/>
 For this, we see timing as a metric and use CTS. 
+
 ```
 make gui_cts
 ```
