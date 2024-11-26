@@ -9407,8 +9407,8 @@ Zoomed view of all macros:<br/>
 
 ### QoR <br/>
 QoR stands for Quality of Results. It refers to a set of metrics used to evaluate the quality of a chip's physical design after various stages of the design process. <br/>
-For this, we see timing as a metric and use CTS. 
-
+For this, we see timing as a metric and use CTS. <br/>
+And also can see the routed design.<br/>
 ```
 make gui_cts
 ```
@@ -9427,7 +9427,9 @@ rm -rf logs/sky130hd/ results/sky130hd/ reports/sky130hd/ objects/sky130hd/
 
 ```
 * All the files are uploaded to this repository including my reports, design files.<br/>
-* And other thing is i have opened so many times the gui file so that you can see the so many instances of it, i took the screenshot of it only at the first time running it. And you can also verify by seeing the terminal name which is same as before ms2024007@ms2024007.<br/>
+* And other thing is i have opened so many times the gui file so that you can see the so many instances of it, i took the screenshot of it only at the first time running it. And you can 
+  also verify by seeing the terminal name which is same as before ms2024007@ms2024007.<br/>
+* I have putted directly whatever i got when i opened that particular gui file and at i last mentioned the important one which is said in the excel sheet.<br/>
 ## References:
 
 *  https://forgefunder.com/~kunal/riscv_workshop.vdi
